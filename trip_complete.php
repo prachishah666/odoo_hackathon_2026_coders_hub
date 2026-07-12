@@ -101,10 +101,16 @@ $query = mysqli_query(
 $trip = mysqli_fetch_assoc($query);
 
 include("includes/header.php");
-include("includes/sidebar.php");
-include("includes/navbar.php");
 
 ?>
+
+<div class="container">
+
+<?php include("includes/sidebar.php"); ?>
+
+<div class="main-content">
+
+<?php include("includes/navbar.php"); ?>
 
 <div class="page-title">
 
@@ -235,4 +241,10 @@ Cancel
 </form>
 
 </section>
+</section>
+
+</div>
+
+</div>
+
 <?php include("includes/footer.php"); ?>
