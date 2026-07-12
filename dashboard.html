@@ -1,24 +1,22 @@
 <?php
-// session will be added later
+// Dashboard (Frontend)
+// Session check will be added later.
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <title>TransitOps | Dashboard</title>
 
-    <title>TransitOps Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
 
+    <!-- Font Awesome -->
     <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 </head>
 
@@ -26,9 +24,7 @@
 
 <div class="container">
 
-    <!-- =========================
-            SIDEBAR
-    ========================== -->
+    <!-- ================= SIDEBAR ================= -->
 
     <aside class="sidebar">
 
@@ -40,59 +36,113 @@
 
         </div>
 
-        <ul>
+        <ul class="menu">
 
             <li class="active">
-                <i class="fa-solid fa-table-columns"></i>
-                Dashboard
+
+                <a href="dashboard.php">
+
+                    <i class="fa-solid fa-table-columns"></i>
+
+                    <span>Dashboard</span>
+
+                </a>
+
             </li>
 
             <li>
-                <i class="fa-solid fa-truck"></i>
-                Vehicles
+
+                <a href="vehicles.php">
+
+                    <i class="fa-solid fa-truck"></i>
+
+                    <span>Vehicles</span>
+
+                </a>
+
             </li>
 
             <li>
-                <i class="fa-solid fa-id-card"></i>
-                Drivers
+
+                <a href="drivers.php">
+
+                    <i class="fa-solid fa-id-card"></i>
+
+                    <span>Drivers</span>
+
+                </a>
+
             </li>
 
             <li>
-                <i class="fa-solid fa-route"></i>
-                Trips
+
+                <a href="trips.php">
+
+                    <i class="fa-solid fa-route"></i>
+
+                    <span>Trips</span>
+
+                </a>
+
             </li>
 
             <li>
-                <i class="fa-solid fa-screwdriver-wrench"></i>
-                Maintenance
+
+                <a href="maintenance.php">
+
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+
+                    <span>Maintenance</span>
+
+                </a>
+
             </li>
 
             <li>
-                <i class="fa-solid fa-gas-pump"></i>
-                Fuel & Expenses
+
+                <a href="fuel.php">
+
+                    <i class="fa-solid fa-gas-pump"></i>
+
+                    <span>Fuel & Expenses</span>
+
+                </a>
+
             </li>
 
             <li>
-                <i class="fa-solid fa-chart-column"></i>
-                Reports
+
+                <a href="reports.php">
+
+                    <i class="fa-solid fa-chart-column"></i>
+
+                    <span>Reports</span>
+
+                </a>
+
             </li>
 
             <li>
-                <i class="fa-solid fa-gear"></i>
-                Settings
+
+                <a href="settings.php">
+
+                    <i class="fa-solid fa-gear"></i>
+
+                    <span>Settings</span>
+
+                </a>
+
             </li>
 
         </ul>
 
     </aside>
 
-    <!-- =========================
-            MAIN CONTENT
-    ========================== -->
+    <!-- ================= MAIN ================= -->
 
     <main class="main-content">
 
-        <!-- NAVBAR -->
+        <!-- ========= TOP BAR ========= -->
 
         <header class="topbar">
 
@@ -100,14 +150,25 @@
 
                 <i class="fa-solid fa-magnifying-glass"></i>
 
-                <input type="text"
-                       placeholder="Search...">
+                <input
+                    type="text"
+                    placeholder="Search vehicles, drivers, trips...">
 
             </div>
 
-            <div class="profile">
+            <div class="top-right">
 
-                <span>Fleet Manager</span>
+                <button class="dispatch-btn">
+
+                    Dispatch Trip
+
+                </button>
+
+                <span class="username">
+
+                    Fleet Manager
+
+                </span>
 
                 <div class="avatar">
 
@@ -119,7 +180,7 @@
 
         </header>
 
-        <!-- FILTERS -->
+        <!-- ========= FILTERS ========= -->
 
         <section class="filters">
 
@@ -129,9 +190,9 @@
 
                 <option>Truck</option>
 
-                <option>Van</option>
-
                 <option>Mini Truck</option>
+
+                <option>Van</option>
 
             </select>
 
@@ -163,13 +224,13 @@
 
         </section>
 
-        <!-- KPI CARDS -->
+        <!-- ========= KPI CARDS ========= -->
 
         <section class="cards">
 
             <div class="card">
 
-                <h4>Active Vehicles</h4>
+                <p>Active Vehicles</p>
 
                 <h2>53</h2>
 
@@ -177,7 +238,7 @@
 
             <div class="card">
 
-                <h4>Available Vehicles</h4>
+                <p>Available Vehicles</p>
 
                 <h2>42</h2>
 
@@ -185,7 +246,7 @@
 
             <div class="card">
 
-                <h4>Maintenance</h4>
+                <p>Maintenance</p>
 
                 <h2>05</h2>
 
@@ -193,7 +254,7 @@
 
             <div class="card">
 
-                <h4>Active Trips</h4>
+                <p>Active Trips</p>
 
                 <h2>18</h2>
 
@@ -201,7 +262,7 @@
 
             <div class="card">
 
-                <h4>Drivers On Duty</h4>
+                <p>Drivers On Duty</p>
 
                 <h2>26</h2>
 
@@ -209,7 +270,7 @@
 
             <div class="card">
 
-                <h4>Fleet Utilization</h4>
+                <p>Fleet Utilization</p>
 
                 <h2>87%</h2>
 
@@ -217,13 +278,24 @@
 
         </section>
 
-        <!-- TABLE + STATUS -->
+        <!-- ========= LOWER GRID ========= -->
 
         <section class="dashboard-grid">
+                        <!-- ========= RECENT TRIPS ========= -->
 
             <div class="recent-trips">
 
-                <h3>Recent Trips</h3>
+                <div class="section-header">
+
+                    <h3>Recent Trips</h3>
+
+                    <button class="view-btn">
+
+                        View All
+
+                    </button>
+
+                </div>
 
                 <table>
 
@@ -231,11 +303,13 @@
 
                         <tr>
 
-                            <th>Trip</th>
+                            <th>Trip ID</th>
 
                             <th>Vehicle</th>
 
                             <th>Driver</th>
+
+                            <th>Destination</th>
 
                             <th>Status</th>
 
@@ -251,9 +325,11 @@
 
                             <td>TR001</td>
 
-                            <td>Van-05</td>
+                            <td>Truck A12</td>
 
                             <td>Alex</td>
+
+                            <td>Delhi</td>
 
                             <td>
 
@@ -265,7 +341,7 @@
 
                             </td>
 
-                            <td>45 mins</td>
+                            <td>2 hrs</td>
 
                         </tr>
 
@@ -273,9 +349,11 @@
 
                             <td>TR002</td>
 
-                            <td>Truck-12</td>
+                            <td>Van V05</td>
 
                             <td>John</td>
+
+                            <td>Jaipur</td>
 
                             <td>
 
@@ -295,9 +373,11 @@
 
                             <td>TR003</td>
 
-                            <td>Mini-08</td>
+                            <td>Mini T08</td>
 
                             <td>Priya</td>
+
+                            <td>Agra</td>
 
                             <td>
 
@@ -309,7 +389,55 @@
 
                             </td>
 
-                            <td>10 mins</td>
+                            <td>35 mins</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>TR004</td>
+
+                            <td>Truck X22</td>
+
+                            <td>Rahul</td>
+
+                            <td>Noida</td>
+
+                            <td>
+
+                                <span class="badge red">
+
+                                    Delayed
+
+                                </span>
+
+                            </td>
+
+                            <td>Unknown</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>TR005</td>
+
+                            <td>Truck Z11</td>
+
+                            <td>Akash</td>
+
+                            <td>Lucknow</td>
+
+                            <td>
+
+                                <span class="badge green">
+
+                                    Completed
+
+                                </span>
+
+                            </td>
+
+                            <td>-</td>
 
                         </tr>
 
@@ -319,63 +447,131 @@
 
             </div>
 
+            <!-- ========= VEHICLE STATUS ========= -->
+
             <div class="vehicle-status">
 
-                <h3>Vehicle Status</h3>
+                <h3>Fleet Status</h3>
 
-                <h3>Vehicle Status</h3>
+                <div class="status-box">
 
-            <div class="progress-item">
+                    <div class="progress-item">
 
-                <span>Available</span>
+                        <div class="progress-top">
 
-            <div class="progress">
+                            <span>Available</span>
 
-                <div class="progress-fill green" style="width:82%;"></div>
+                            <span>82%</span>
 
-            </div>
+                        </div>
 
-            </div>
+                        <div class="progress">
 
-            <div class="progress-item">
+                            <div class="progress-fill green" style="width:82%;"></div>
 
-                <span>On Trip</span>
+                        </div>
 
-            <div class="progress">
+                    </div>
 
-            <div class="progress-fill blue" style="width:48%;"></div>
+                    <div class="progress-item">
 
-            </div>
+                        <div class="progress-top">
 
-            </div>
+                            <span>On Trip</span>
 
-            <div class="progress-item">
+                            <span>48%</span>
 
-                <span>Maintenance</span>
+                        </div>
 
-            <div class="progress">
+                        <div class="progress">
 
-            <div class="progress-fill orange" style="width:20%;"></div>
+                            <div class="progress-fill blue" style="width:48%;"></div>
 
-        </div>
+                        </div>
 
-        </div>
+                    </div>
 
-        <div class="progress-item">
+                    <div class="progress-item">
 
-        <span>Retired</span>
+                        <div class="progress-top">
 
-        <div class="progress">
+                            <span>Maintenance</span>
 
-        <div class="progress-fill red" style="width:8%;"></div>
+                            <span>18%</span>
 
-    </div>
+                        </div>
 
-</div>
+                        <div class="progress">
+
+                            <div class="progress-fill orange" style="width:18%;"></div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="progress-item">
+
+                        <div class="progress-top">
+
+                            <span>Retired</span>
+
+                            <span>6%</span>
+
+                        </div>
+
+                        <div class="progress">
+
+                            <div class="progress-fill red" style="width:6%;"></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="quick-summary">
+
+                    <div class="summary-card">
+
+                        <h4>Fuel Cost</h4>
+
+                        <h2>₹52,800</h2>
+
+                    </div>
+
+                    <div class="summary-card">
+
+                        <h4>Maintenance</h4>
+
+                        <h2>₹12,450</h2>
+
+                    </div>
+
+                    <div class="summary-card">
+
+                        <h4>Efficiency</h4>
+
+                        <h2>91%</h2>
+
+                    </div>
+
+                </div>
 
             </div>
 
         </section>
+                <!-- ========= FOOTER ========= -->
+
+        <footer class="dashboard-footer">
+
+            <p>
+
+                © 2026 TransitOps ERP |
+                Fleet Management System
+
+            </p>
+
+        </footer>
 
     </main>
 
@@ -384,5 +580,5 @@
 <script src="assets/js/dashboard.js"></script>
 
 </body>
-</html>
 
+</html>
