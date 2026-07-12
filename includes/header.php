@@ -15,7 +15,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>TransitOps</title>
+<title>TransitOps | Dashboard</title>
 
 <!-- Bootstrap -->
 <link
@@ -34,7 +34,7 @@ rel="stylesheet">
 
 <!-- Custom CSS -->
 <link rel="stylesheet"
-href="/TransitOps/assets/css/style.css">
+href="assets/css/style.css">
 
 </head>
 
