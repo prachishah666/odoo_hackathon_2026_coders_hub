@@ -22,6 +22,103 @@ include("includes/header.php");
 
         <?php include("includes/navbar.php"); ?>
 
+        <?php
+
+// ==========================
+// Dashboard Statistics
+// ==========================
+
+// Total Vehicles
+$result = mysqli_query($conn,"SELECT COUNT(*) total FROM vehicles");
+$totalVehicles = mysqli_fetch_assoc($result)['total'];
+
+// Available Vehicles
+$result = mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM vehicles
+WHERE status='Available'
+");
+$availableVehicles = mysqli_fetch_assoc($result)['total'];
+
+// Vehicles In Shop
+$result = mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM vehicles
+WHERE status='In Shop'
+");
+$maintenanceVehicles = mysqli_fetch_assoc($result)['total'];
+
+// Vehicles On Trip
+$result = mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM vehicles
+WHERE status='On Trip'
+");
+$tripVehicles = mysqli_fetch_assoc($result)['total'];
+
+
+// Total Drivers
+$result = mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM drivers
+");
+$totalDrivers = mysqli_fetch_assoc($result)['total'];
+
+
+// Available Drivers
+$result = mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM drivers
+WHERE status='Available'
+");
+$availableDrivers = mysqli_fetch_assoc($result)['total'];
+
+
+// Active Maintenance
+$result = mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM maintenance_logs
+WHERE status='Active'
+");
+$activeMaintenance = mysqli_fetch_assoc($result)['total'];
+
+
+// Fuel Cost This Month
+$result = mysqli_query($conn,"
+SELECT
+IFNULL(SUM(fuel_cost),0) total
+
+FROM fuel_logs
+
+WHERE MONTH(fuel_date)=MONTH(CURDATE())
+
+AND YEAR(fuel_date)=YEAR(CURDATE())
+");
+
+$monthlyFuel = mysqli_fetch_assoc($result)['total'];
+
+
+// Fleet Utilization
+
+if($totalVehicles>0)
+{
+    $fleetUtilization = round(
+
+        (($tripVehicles+$maintenanceVehicles)
+
+        /$totalVehicles)
+
+        *100
+
+    );
+}
+else
+{
+    $fleetUtilization = 0;
+}
+
+?>
+
         <!-- ========= TOP BAR ========= -->
 
         <header class="topbar">
@@ -114,7 +211,7 @@ include("includes/header.php");
 
                 <p>Active Vehicles</p>
 
-                <h2>53</h2>
+                <h2><?php echo $totalVehicles; ?></h2>
 
             </div>
 
@@ -122,7 +219,7 @@ include("includes/header.php");
 
                 <p>Available Vehicles</p>
 
-                <h2>42</h2>
+                <h2><?php echo $availableVehicles; ?></h2>
 
             </div>
 
@@ -130,7 +227,7 @@ include("includes/header.php");
 
                 <p>Maintenance</p>
 
-                <h2>05</h2>
+                <h2><?php echo $activeMaintenance; ?></h2>
 
             </div>
 
@@ -138,7 +235,7 @@ include("includes/header.php");
 
                 <p>Active Trips</p>
 
-                <h2>18</h2>
+                <h2><?php echo $tripVehicles; ?></h2>
 
             </div>
 
@@ -146,7 +243,7 @@ include("includes/header.php");
 
                 <p>Drivers On Duty</p>
 
-                <h2>26</h2>
+                <h2><?php echo $availableDrivers; ?></h2>
 
             </div>
 
@@ -154,7 +251,7 @@ include("includes/header.php");
 
                 <p>Fleet Utilization</p>
 
-                <h2>87%</h2>
+                <h2><?php echo $fleetUtilization; ?>%</h2>
 
             </div>
 
@@ -417,7 +514,7 @@ include("includes/header.php");
 
                         <h4>Fuel Cost</h4>
 
-                        <h2>₹52,800</h2>
+                        <h2>₹ <?php echo number_format($monthlyFuel,2); ?></h2>
 
                     </div>
 
