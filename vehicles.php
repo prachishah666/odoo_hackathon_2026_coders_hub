@@ -1,5 +1,8 @@
 <?php
 include("includes/auth_check.php");
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 
 <!DOCTYPE html>
@@ -510,3 +513,4 @@ include("includes/auth_check.php");
 </body>
 
 </html>
+<?php include("includes/footer.php"); ?>
