@@ -1,0 +1,388 @@
+<?php
+// session will be added later
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>TransitOps Dashboard</title>
+
+    <link rel="stylesheet"
+          href="assets/css/style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- =========================
+            SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <i class="fa-solid fa-truck-fast"></i>
+
+            <h2>TransitOps</h2>
+
+        </div>
+
+        <ul>
+
+            <li class="active">
+                <i class="fa-solid fa-table-columns"></i>
+                Dashboard
+            </li>
+
+            <li>
+                <i class="fa-solid fa-truck"></i>
+                Vehicles
+            </li>
+
+            <li>
+                <i class="fa-solid fa-id-card"></i>
+                Drivers
+            </li>
+
+            <li>
+                <i class="fa-solid fa-route"></i>
+                Trips
+            </li>
+
+            <li>
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                Maintenance
+            </li>
+
+            <li>
+                <i class="fa-solid fa-gas-pump"></i>
+                Fuel & Expenses
+            </li>
+
+            <li>
+                <i class="fa-solid fa-chart-column"></i>
+                Reports
+            </li>
+
+            <li>
+                <i class="fa-solid fa-gear"></i>
+                Settings
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- =========================
+            MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content">
+
+        <!-- NAVBAR -->
+
+        <header class="topbar">
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input type="text"
+                       placeholder="Search...">
+
+            </div>
+
+            <div class="profile">
+
+                <span>Fleet Manager</span>
+
+                <div class="avatar">
+
+                    RK
+
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- FILTERS -->
+
+        <section class="filters">
+
+            <select>
+
+                <option>Vehicle Type</option>
+
+                <option>Truck</option>
+
+                <option>Van</option>
+
+                <option>Mini Truck</option>
+
+            </select>
+
+            <select>
+
+                <option>Status</option>
+
+                <option>Available</option>
+
+                <option>On Trip</option>
+
+                <option>Maintenance</option>
+
+            </select>
+
+            <select>
+
+                <option>Region</option>
+
+                <option>North</option>
+
+                <option>South</option>
+
+                <option>East</option>
+
+                <option>West</option>
+
+            </select>
+
+        </section>
+
+        <!-- KPI CARDS -->
+
+        <section class="cards">
+
+            <div class="card">
+
+                <h4>Active Vehicles</h4>
+
+                <h2>53</h2>
+
+            </div>
+
+            <div class="card">
+
+                <h4>Available Vehicles</h4>
+
+                <h2>42</h2>
+
+            </div>
+
+            <div class="card">
+
+                <h4>Maintenance</h4>
+
+                <h2>05</h2>
+
+            </div>
+
+            <div class="card">
+
+                <h4>Active Trips</h4>
+
+                <h2>18</h2>
+
+            </div>
+
+            <div class="card">
+
+                <h4>Drivers On Duty</h4>
+
+                <h2>26</h2>
+
+            </div>
+
+            <div class="card">
+
+                <h4>Fleet Utilization</h4>
+
+                <h2>87%</h2>
+
+            </div>
+
+        </section>
+
+        <!-- TABLE + STATUS -->
+
+        <section class="dashboard-grid">
+
+            <div class="recent-trips">
+
+                <h3>Recent Trips</h3>
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Trip</th>
+
+                            <th>Vehicle</th>
+
+                            <th>Driver</th>
+
+                            <th>Status</th>
+
+                            <th>ETA</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>TR001</td>
+
+                            <td>Van-05</td>
+
+                            <td>Alex</td>
+
+                            <td>
+
+                                <span class="badge blue">
+
+                                    On Trip
+
+                                </span>
+
+                            </td>
+
+                            <td>45 mins</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>TR002</td>
+
+                            <td>Truck-12</td>
+
+                            <td>John</td>
+
+                            <td>
+
+                                <span class="badge green">
+
+                                    Completed
+
+                                </span>
+
+                            </td>
+
+                            <td>-</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>TR003</td>
+
+                            <td>Mini-08</td>
+
+                            <td>Priya</td>
+
+                            <td>
+
+                                <span class="badge orange">
+
+                                    Dispatched
+
+                                </span>
+
+                            </td>
+
+                            <td>10 mins</td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="vehicle-status">
+
+                <h3>Vehicle Status</h3>
+
+                <h3>Vehicle Status</h3>
+
+            <div class="progress-item">
+
+                <span>Available</span>
+
+            <div class="progress">
+
+                <div class="progress-fill green" style="width:82%;"></div>
+
+            </div>
+
+            </div>
+
+            <div class="progress-item">
+
+                <span>On Trip</span>
+
+            <div class="progress">
+
+            <div class="progress-fill blue" style="width:48%;"></div>
+
+            </div>
+
+            </div>
+
+            <div class="progress-item">
+
+                <span>Maintenance</span>
+
+            <div class="progress">
+
+            <div class="progress-fill orange" style="width:20%;"></div>
+
+        </div>
+
+        </div>
+
+        <div class="progress-item">
+
+        <span>Retired</span>
+
+        <div class="progress">
+
+        <div class="progress-fill red" style="width:8%;"></div>
+
+    </div>
+
+</div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="assets/js/dashboard.js"></script>
+
+</body>
+</html>
+
