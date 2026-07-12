@@ -1,229 +1,93 @@
 <?php
 
 include("includes/auth_check.php");
-
 include("includes/header.php");
+include("config/database.php");
 
-include("includes/sidebar.php");
+$search = "";
 
-include("includes/navbar.php");
+$success = "";
+
+if(isset($_GET['search']))
+{
+    $search = trim($_GET['search']);
+}
+
+if(isset($_GET['added']))
+{
+    $success="<div class='alert alert-success'>
+    Driver Added Successfully.
+    </div>";
+}
+
+if(isset($_GET['updated']))
+{
+    $success="<div class='alert alert-info'>
+    Driver Updated Successfully.
+    </div>";
+}
+
+if(isset($_GET['deleted']))
+{
+    $success="<div class='alert alert-warning'>
+    Driver Deleted Successfully.
+    </div>";
+}
 
 ?>
-
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>TransitOps | Drivers</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
 <div class="container">
 
-    <aside class="sidebar">
+    <?php include("includes/sidebar.php"); ?>
 
-        <h2>
+    <div class="main-content">
 
-            <i class="fa-solid fa-truck-fast"></i>
-
-            TransitOps
-
-        </h2>
-
-        <ul>
-
-            <li>
-
-                <a href="dashboard.php">
-
-                    <i class="fa-solid fa-table-columns"></i>
-
-                    <span>Dashboard</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="vehicles.php">
-
-                    <i class="fa-solid fa-truck"></i>
-
-                    <span>Vehicles</span>
-
-                </a>
-
-            </li>
-
-            <li class="active">
-
-                <a href="drivers.php">
-
-                    <i class="fa-solid fa-id-card"></i>
-
-                    <span>Drivers</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="trips.php">
-
-                    <i class="fa-solid fa-route"></i>
-
-                    <span>Trips</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="maintenance.php">
-
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                    <span>Maintenance</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="fuel.php">
-
-                    <i class="fa-solid fa-gas-pump"></i>
-
-                    <span>Fuel & Expenses</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="reports.php">
-
-                    <i class="fa-solid fa-chart-column"></i>
-
-                    <span>Reports</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="settings.php">
-
-                    <i class="fa-solid fa-gear"></i>
-
-                    <span>Settings</span>
-
-                </a>
-
-            </li>
-
-        </ul>
-
-    </aside>
-
-    <main class="main-content">
-
-        <header class="topbar">
-
-            <div class="search-box">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="text"
-                    placeholder="Search Driver...">
-
-            </div>
-
-            <div class="top-right">
-
-                <a href="driver_add.php">
-
-                    <button class="dispatch-btn">
-
-                        <i class="fa-solid fa-plus"></i>
-
-                        Add Driver
-
-                    </button>
-
-                </a>
-
-            </div>
-
-        </header>
+        <?php include("includes/navbar.php"); ?>
 
         <div class="page-title">
 
-            <h1>Driver Management</h1>
+            <h1>Drivers</h1>
 
-            <p>
+            <p>Manage your drivers.</p>
 
-                Manage driver profiles, licenses and assignments.
-
-            </p>
+            <?php echo $success; ?>
 
         </div>
 
-        <section class="filters">
+        <div class="top-actions">
 
-            <select>
+            <form method="GET" class="search-form">
 
-                <option>Status</option>
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search by Name, Email or License..."
+                    value="<?php echo htmlspecialchars($search); ?>">
 
-                <option>Available</option>
+                <button
+                    type="submit"
+                    class="dispatch-btn">
 
-                <option>On Trip</option>
+                    <i class="fa-solid fa-magnifying-glass"></i>
 
-                <option>Off Duty</option>
+                    Search
 
-            </select>
+                </button>
 
-            <select>
+            </form>
 
-                <option>License Type</option>
+            <a
+                href="driver_add.php"
+                class="dispatch-btn">
 
-                <option>LMV</option>
+                <i class="fa-solid fa-user-plus"></i>
 
-                <option>HMV</option>
+                Add Driver
 
-            </select>
+            </a>
 
-        </section>
+        </div>
 
-        <section class="recent-trips">
-
-            <div class="section-header">
-
-                <h3>Drivers</h3>
-
-            </div>
+        <div class="recent-trips">
 
             <table>
 
@@ -235,265 +99,230 @@ include("includes/navbar.php");
 
                         <th>Name</th>
 
-                        <th>License</th>
+                        <th>Email</th>
 
                         <th>Phone</th>
 
-                        <th>Status</th>
+                        <th>License No.</th>
+
+                        <th>Category</th>
+
+                        <th>Expiry</th>
 
                         <th>Safety Score</th>
 
-                        <th>Action</th>
+                        <th>Status</th>
+
+                        <th>Actions</th>
 
                     </tr>
 
                 </thead>
 
                 <tbody>
-                                        <tr>
+                    <?php
 
-                        <td>DR001</td>
+if($search != "")
+{
+    $stmt = mysqli_prepare(
 
-                        <td>Alex Johnson</td>
+        $conn,
 
-                        <td>HMV-458921</td>
+        "SELECT
+            d.driver_id,
+            u.full_name,
+            u.email,
+            u.phone,
+            d.license_number,
+            d.license_category,
+            d.license_expiry,
+            d.safety_score,
+            d.status
 
-                        <td>+91 9876543210</td>
+        FROM drivers d
 
-                        <td>
+        INNER JOIN users u
+        ON d.user_id = u.user_id
 
-                            <span class="badge green">
+        WHERE
 
-                                Available
+        u.full_name LIKE ?
 
-                            </span>
+        OR
 
-                        </td>
+        u.email LIKE ?
 
-                        <td>98%</td>
+        OR
 
-                        <td>
+        d.license_number LIKE ?
 
-                            <a href="driver_edit.php?id=1">
+        ORDER BY d.driver_id DESC"
 
-                                <button class="edit-btn">
+    );
 
-                                    <i class="fa-solid fa-pen"></i>
+    $keyword = "%".$search."%";
 
-                                </button>
+    mysqli_stmt_bind_param(
 
-                            </a>
+        $stmt,
 
-                            <button class="delete-btn">
+        "sss",
 
-                                <i class="fa-solid fa-trash"></i>
+        $keyword,
 
-                            </button>
+        $keyword,
 
-                        </td>
+        $keyword
 
-                    </tr>
+    );
+}
+else
+{
 
-                    <tr>
+    $stmt = mysqli_prepare(
 
-                        <td>DR002</td>
+        $conn,
 
-                        <td>John Smith</td>
+        "SELECT
+            d.driver_id,
+            u.full_name,
+            u.email,
+            u.phone,
+            d.license_number,
+            d.license_category,
+            d.license_expiry,
+            d.safety_score,
+            d.status
 
-                        <td>HMV-563214</td>
+        FROM drivers d
 
-                        <td>+91 9988776655</td>
+        INNER JOIN users u
+        ON d.user_id = u.user_id
 
-                        <td>
+        ORDER BY d.driver_id DESC"
 
-                            <span class="badge blue">
+    );
 
-                                On Trip
+}
 
-                            </span>
+mysqli_stmt_execute($stmt);
 
-                        </td>
+$result = mysqli_stmt_get_result($stmt);
 
-                        <td>95%</td>
+if($result && mysqli_num_rows($result)>0)
+{
 
-                        <td>
+    while($row = mysqli_fetch_assoc($result))
+    {
 
-                            <a href="driver_edit.php?id=2">
+?>
+<tr>
 
-                                <button class="edit-btn">
+    <td><?php echo $row['driver_id']; ?></td>
 
-                                    <i class="fa-solid fa-pen"></i>
+    <td><?php echo htmlspecialchars($row['full_name'] ?? ''); ?></td>
 
-                                </button>
+    <td><?php echo htmlspecialchars($row['email'] ?? ''); ?></td>
 
-                            </a>
+    <td><?php echo htmlspecialchars($row['phone'] ?? 'N/A'); ?></td>
 
-                            <button class="delete-btn">
+    <td><?php echo htmlspecialchars($row['license_number' ?? '']); ?></td>
 
-                                <i class="fa-solid fa-trash"></i>
+    <td><?php echo htmlspecialchars($row['license_category'] ?? 'N/A'); ?></td>
 
-                            </button>
+    <td>
+<?php
+echo !empty($row['license_expiry'])
+    ? htmlspecialchars($row['license_expiry'])
+    : 'N/A';
+?>
+</td>
 
-                        </td>
+    <td><?php echo number_format((float)$row['safety_score'],2); ?></td>
 
-                    </tr>
+    <td>
 
-                    <tr>
+<?php
 
-                        <td>DR003</td>
+$status = $row['status'];
 
-                        <td>Rahul Sharma</td>
+if($status=="Available")
+{
+    echo "<span class='badge green'>Available</span>";
+}
+elseif($status=="On Trip")
+{
+    echo "<span class='badge blue'>On Trip</span>";
+}
+elseif($status=="Off Duty")
+{
+    echo "<span class='badge orange'>Off Duty</span>";
+}
+else
+{
+    echo "<span class='badge red'>Suspended</span>";
+}
 
-                        <td>LMV-125489</td>
+?>
 
-                        <td>+91 9123456789</td>
+    </td>
 
-                        <td>
+    <td>
 
-                            <span class="badge orange">
+        <a
+        href="driver_edit.php?id=<?php echo $row['driver_id']; ?>"
+        class="edit-btn">
 
-                                Off Duty
+            <i class="fa-solid fa-pen"></i>
 
-                            </span>
+        </a>
 
-                        </td>
+        <a
+        href="driver_delete.php?id=<?php echo $row['driver_id']; ?>"
+        class="delete-btn"
+        onclick="return confirm('Delete this driver?');">
 
-                        <td>92%</td>
+            <i class="fa-solid fa-trash"></i>
 
-                        <td>
+        </a>
 
-                            <a href="driver_edit.php?id=3">
+    </td>
 
-                                <button class="edit-btn">
+</tr>
 
-                                    <i class="fa-solid fa-pen"></i>
+<?php
 
-                                </button>
+    }
 
-                            </a>
+}
+else
+{
 
-                            <button class="delete-btn">
+?>
 
-                                <i class="fa-solid fa-trash"></i>
+<tr>
 
-                            </button>
+    <td colspan="10" style="text-align:center;">
 
-                        </td>
+        No Drivers Found
 
-                    </tr>
+    </td>
 
-                    <tr>
+</tr>
 
-                        <td>DR004</td>
+<?php
 
-                        <td>Priya Verma</td>
+}
 
-                        <td>HMV-894512</td>
-
-                        <td>+91 9011223344</td>
-
-                        <td>
-
-                            <span class="badge green">
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-                        <td>99%</td>
-
-                        <td>
-
-                            <a href="driver_edit.php?id=4">
-
-                                <button class="edit-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                            <button class="delete-btn">
-
-                                <i class="fa-solid fa-trash"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>DR005</td>
-
-                        <td>Akash Singh</td>
-
-                        <td>HMV-774411</td>
-
-                        <td>+91 9870011223</td>
-
-                        <td>
-
-                            <span class="badge red">
-
-                                Suspended
-
-                            </span>
-
-                        </td>
-
-                        <td>70%</td>
-
-                        <td>
-
-                            <a href="driver_edit.php?id=5">
-
-                                <button class="edit-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                            <button class="delete-btn">
-
-                                <i class="fa-solid fa-trash"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
+?>
                 </tbody>
 
             </table>
 
-        </section>
-                <footer class="dashboard-footer">
+        </div>
 
-            <p>
-
-                © 2026 TransitOps ERP |
-                Fleet Management System
-
-            </p>
-
-        </footer>
-
-    </main>
+    </div>
 
 </div>
-
-<script src="assets/js/dashboard.js"></script>
-
-</body>
-
-</html>
 
 <?php include("includes/footer.php"); ?>
