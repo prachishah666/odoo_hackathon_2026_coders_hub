@@ -4,13 +4,17 @@ include("includes/auth_check.php");
 
 include("includes/header.php");
 
-include("includes/sidebar.php");
-
-include("includes/navbar.php");
-
 ?>
 
-<div class="page-title">
+<div class="container">
+
+    <?php include("includes/sidebar.php"); ?>
+
+    <div class="main-content">
+
+        <?php include("includes/navbar.php"); ?>
+
+        <div class="page-title">
 
     <h1>System Settings</h1>
 
