@@ -4,7 +4,7 @@ include("includes/auth_check.php");
 
 include("includes/header.php");
 
-
+include("config/database.php");
 ?>
 
 
@@ -97,6 +97,54 @@ AND YEAR(fuel_date)=YEAR(CURDATE())
 
 $monthlyFuel = mysqli_fetch_assoc($result)['total'];
 
+// Retired Vehicles
+$result = mysqli_query(
+    $conn,
+    "SELECT COUNT(*) total
+     FROM vehicles
+     WHERE status='Retired'"
+);
+
+$retiredVehicles = mysqli_fetch_assoc($result)['total'];
+
+
+// Maintenance Cost
+
+$result = mysqli_query(
+    $conn,
+    "SELECT IFNULL(SUM(maintenance_cost),0) total
+     FROM maintenance_logs"
+);
+
+$maintenanceCost = mysqli_fetch_assoc($result)['total'];
+
+
+// Percentages
+
+if($totalVehicles>0)
+{
+
+    $availablePercent = round(($availableVehicles/$totalVehicles)*100);
+
+    $tripPercent = round(($tripVehicles/$totalVehicles)*100);
+
+    $maintenancePercent = round(($maintenanceVehicles/$totalVehicles)*100);
+
+    $retiredPercent = round(($retiredVehicles/$totalVehicles)*100);
+
+}
+else
+{
+
+    $availablePercent = 0;
+
+    $tripPercent = 0;
+
+    $maintenancePercent = 0;
+
+    $retiredPercent = 0;
+
+}
 
 // Fleet Utilization
 
@@ -299,127 +347,146 @@ else
                     </thead>
 
                     <tbody>
+                        <?php
 
-                        <tr>
+$query = mysqli_query($conn, "
 
-                            <td>TR001</td>
+SELECT
 
-                            <td>Truck A12</td>
+t.trip_id,
 
-                            <td>Alex</td>
+t.destination,
 
-                            <td>Delhi</td>
+t.status,
 
-                            <td>
+v.vehicle_name,
 
-                                <span class="badge blue">
+u.full_name
 
-                                    On Trip
+FROM trips t
 
-                                </span>
+INNER JOIN vehicles v
+ON t.vehicle_id=v.vehicle_id
 
-                            </td>
+INNER JOIN drivers d
+ON t.driver_id=d.driver_id
 
-                            <td>2 hrs</td>
+INNER JOIN users u
+ON d.user_id=u.user_id
 
-                        </tr>
+ORDER BY t.trip_id DESC
 
-                        <tr>
+LIMIT 5
 
-                            <td>TR002</td>
+");
 
-                            <td>Van V05</td>
+if(mysqli_num_rows($query)>0)
+{
 
-                            <td>John</td>
+while($row=mysqli_fetch_assoc($query))
+{
 
-                            <td>Jaipur</td>
+?>
+<tr>
 
-                            <td>
+<td>
 
-                                <span class="badge green">
+TR<?php echo str_pad($row['trip_id'],3,"0",STR_PAD_LEFT); ?>
 
-                                    Completed
+</td>
 
-                                </span>
+<td>
 
-                            </td>
+<?php echo htmlspecialchars($row['vehicle_name']); ?>
 
-                            <td>-</td>
+</td>
 
-                        </tr>
+<td>
 
-                        <tr>
+<?php echo htmlspecialchars($row['full_name']); ?>
 
-                            <td>TR003</td>
+</td>
 
-                            <td>Mini T08</td>
+<td>
 
-                            <td>Priya</td>
+<?php echo htmlspecialchars($row['destination']); ?>
 
-                            <td>Agra</td>
+</td>
 
-                            <td>
+<td>
 
-                                <span class="badge orange">
+<?php
 
-                                    Dispatched
+$status=$row['status'];
 
-                                </span>
+if($status=="Completed")
+{
 
-                            </td>
+echo "<span class='badge green'>Completed</span>";
 
-                            <td>35 mins</td>
+}
+elseif($status=="Dispatched")
+{
 
-                        </tr>
+echo "<span class='badge orange'>Dispatched</span>";
 
-                        <tr>
+}
+elseif($status=="Draft")
+{
 
-                            <td>TR004</td>
+echo "<span class='badge blue'>Draft</span>";
 
-                            <td>Truck X22</td>
+}
+elseif($status=="Cancelled")
+{
 
-                            <td>Rahul</td>
+echo "<span class='badge red'>Cancelled</span>";
 
-                            <td>Noida</td>
+}
+else
+{
 
-                            <td>
+echo "<span class='badge blue'>".$status."</span>";
 
-                                <span class="badge red">
+}
 
-                                    Delayed
+?>
 
-                                </span>
+</td>
 
-                            </td>
+<td>
 
-                            <td>Unknown</td>
+-
 
-                        </tr>
+</td>
 
-                        <tr>
+</tr>
 
-                            <td>TR005</td>
+<?php
 
-                            <td>Truck Z11</td>
+}
 
-                            <td>Akash</td>
+}
+else
+{
 
-                            <td>Lucknow</td>
+?>
 
-                            <td>
+<tr>
 
-                                <span class="badge green">
+<td colspan="6" style="text-align:center;">
 
-                                    Completed
+No Trips Found
 
-                                </span>
+</td>
 
-                            </td>
+</tr>
 
-                            <td>-</td>
+<?php
 
-                        </tr>
+}
 
+?>
                     </tbody>
 
                 </table>
@@ -440,13 +507,13 @@ else
 
                             <span>Available</span>
 
-                            <span>82%</span>
+                            <span><?php echo $availablePercent; ?>%</span>
 
                         </div>
 
                         <div class="progress">
 
-                            <div class="progress-fill green" style="width:82%;"></div>
+                            <div class="progress-fill green" style="width:<?php echo $availablePercent; ?>%;"></div>
 
                         </div>
 
@@ -458,13 +525,13 @@ else
 
                             <span>On Trip</span>
 
-                            <span>48%</span>
+                            <span><?php echo $tripPercent; ?>%</span>
 
                         </div>
 
                         <div class="progress">
 
-                            <div class="progress-fill blue" style="width:48%;"></div>
+                            <div class="progress-fill blue" style="width:<?php echo $tripPercent; ?>%;"></div>
 
                         </div>
 
@@ -476,13 +543,13 @@ else
 
                             <span>Maintenance</span>
 
-                            <span>18%</span>
+                            <span><?php echo $maintenancePercent; ?>%</span>
 
                         </div>
 
                         <div class="progress">
 
-                            <div class="progress-fill orange" style="width:18%;"></div>
+                            <div class="progress-fill orange" style="width:<?php echo $maintenancePercent; ?>%;"></div>
 
                         </div>
 
@@ -494,13 +561,13 @@ else
 
                             <span>Retired</span>
 
-                            <span>6%</span>
+                            <span><?php echo $retiredPercent; ?>%</span>
 
                         </div>
 
                         <div class="progress">
 
-                            <div class="progress-fill red" style="width:6%;"></div>
+                            <div class="progress-fill red" style="width:<?php echo $retiredPercent; ?>%;"></div>
 
                         </div>
 
@@ -522,7 +589,7 @@ else
 
                         <h4>Maintenance</h4>
 
-                        <h2>₹12,450</h2>
+                        <h2>₹ <?php echo number_format($maintenanceCost,2); ?></h2>
 
                     </div>
 
