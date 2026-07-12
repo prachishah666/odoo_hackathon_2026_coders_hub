@@ -1,64 +1,127 @@
 <?php
-
 include("includes/auth_check.php");
-
 include("includes/header.php");
+include("config/database.php");
 
-include("includes/sidebar.php");
+$message = "";
 
-include("includes/navbar.php");
+if(isset($_POST['save']))
+{
+    $registration_number = trim($_POST['registration_number']);
+    $vehicle_name = trim($_POST['vehicle_name']);
+    $vehicle_type = trim($_POST['vehicle_type']);
+    $max_load_capacity = trim($_POST['max_load_capacity']);
+    $odometer = trim($_POST['odometer']);
+    $acquisition_cost = trim($_POST['acquisition_cost']);
+    $status = $_POST['status'];
+
+    // Duplicate Registration Check
+    $check = mysqli_prepare($conn,
+    "SELECT vehicle_id
+    FROM vehicles
+    WHERE registration_number=?");
+
+    mysqli_stmt_bind_param(
+    $check,
+    "s",
+    $registration_number);
+
+    mysqli_stmt_execute($check);
+
+    mysqli_stmt_store_result($check);
+
+    if(mysqli_stmt_num_rows($check)>0)
+    {
+        $message="<div class='alert alert-danger'>
+        Registration Number already exists.
+        </div>";
+    }
+    else
+    {
+        $insert = mysqli_prepare(
+        $conn,
+
+        "INSERT INTO vehicles
+        (
+            registration_number,
+            vehicle_name,
+            vehicle_type,
+            max_load_capacity,
+            odometer,
+            acquisition_cost,
+            status
+        )
+
+        VALUES
+
+        (?,?,?,?,?,?,?)"
+
+        );
+
+        mysqli_stmt_bind_param(
+
+        $insert,
+
+        "sssidds",
+
+        $registration_number,
+        $vehicle_name,
+        $vehicle_type,
+        $max_load_capacity,
+        $odometer,
+        $acquisition_cost,
+        $status
+
+        );
+
+        if(mysqli_stmt_execute($insert))
+        {
+
+            header("Location: vehicles.php?added=1");
+
+            exit();
+
+        }
+
+        else
+        {
+
+            $message =
+
+            "<div class='alert alert-danger'>
+
+            Unable to add vehicle.
+
+            </div>";
+
+        }
+
+    }
+
+}
 
 ?>
-
-<?php
-// Session check will be added later
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Add Vehicle | TransitOps</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
 <div class="container">
 
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include("includes/sidebar.php"); ?>
 
-    <main class="main-content">
+    <div class="main-content">
 
-        <?php include 'includes/navbar.php'; ?>
+        <?php include("includes/navbar.php"); ?>
 
         <div class="page-title">
 
-            <h1>Add New Vehicle</h1>
+            <h1>Add Vehicle</h1>
 
-            <p>
-
-                Register a new vehicle into the fleet.
-
-            </p>
+            <p>Register a new vehicle into the fleet.</p>
 
         </div>
 
-        <section class="recent-trips">
+        <?php echo $message; ?>
 
-            <form action="#" method="POST">
+        <div class="recent-trips">
+
+            <form method="POST">
 
                 <div class="form-grid">
 
@@ -67,18 +130,22 @@ include("includes/navbar.php");
                         <label>Registration Number</label>
 
                         <input
-                            type="text"
-                            placeholder="MH12AB1234">
+                        type="text"
+                        name="registration_number"
+                        placeholder="GJ01AB1234"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>Vehicle Model</label>
+                        <label>Vehicle Name</label>
 
                         <input
-                            type="text"
-                            placeholder="Volvo FH16">
+                        type="text"
+                        name="vehicle_name"
+                        placeholder="Ashok Leyland Truck"
+                        required>
 
                     </div>
 
@@ -86,13 +153,19 @@ include("includes/navbar.php");
 
                         <label>Vehicle Type</label>
 
-                        <select>
+                        <select
+                        name="vehicle_type"
+                        required>
+
+                            <option value="">Select Vehicle</option>
 
                             <option>Truck</option>
 
-                            <option>Van</option>
-
                             <option>Mini Truck</option>
+
+                            <option>Bus</option>
+
+                            <option>Van</option>
 
                             <option>Trailer</option>
 
@@ -102,69 +175,37 @@ include("includes/navbar.php");
 
                     <div class="form-group">
 
-                        <label>Manufacturer</label>
+                        <label>Maximum Load Capacity (KG)</label>
 
                         <input
-                            type="text"
-                            placeholder="Volvo">
+                        type="number"
+                        name="max_load_capacity"
+                        placeholder="5000"
+                        required>
+
+                    </div>
+                                        <div class="form-group">
+
+                        <label>Current Odometer (KM)</label>
+
+                        <input
+                        type="number"
+                        name="odometer"
+                        placeholder="25000"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>Manufacturing Year</label>
+                        <label>Acquisition Cost (₹)</label>
 
                         <input
-                            type="number"
-                            placeholder="2025">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Fuel Type</label>
-
-                        <select>
-
-                            <option>Diesel</option>
-
-                            <option>Petrol</option>
-
-                            <option>CNG</option>
-
-                            <option>Electric</option>
-
-                        </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Fuel Tank Capacity (L)</label>
-
-                        <input
-                            type="number"
-                            placeholder="250">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Maximum Load Capacity (kg)</label>
-
-                        <input
-                            type="number"
-                            placeholder="18000">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Current Odometer (km)</label>
-
-                        <input
-                            type="number"
-                            placeholder="15420">
+                        type="number"
+                        step="0.01"
+                        name="acquisition_cost"
+                        placeholder="1800000"
+                        required>
 
                     </div>
 
@@ -172,43 +213,21 @@ include("includes/navbar.php");
 
                         <label>Status</label>
 
-                        <select>
+                        <select
+                        name="status"
+                        required>
 
-                            <option>Available</option>
+                            <option value="">Select Status</option>
 
-                            <option>On Trip</option>
+                            <option value="Available">Available</option>
 
-                            <option>Maintenance</option>
+                            <option value="On Trip">On Trip</option>
+
+                            <option value="In Shop">In Shop</option>
+
+                            <option value="Retired">Retired</option>
 
                         </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Purchase Date</label>
-
-                        <input
-                            type="date">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Insurance Expiry</label>
-
-                        <input
-                            type="date">
-
-                    </div>
-
-                    <div class="form-group full-width">
-
-                        <label>Additional Notes</label>
-
-                        <textarea
-                            rows="5"
-                            placeholder="Enter any additional vehicle details..."></textarea>
 
                     </div>
 
@@ -217,8 +236,9 @@ include("includes/navbar.php");
                 <div class="form-buttons">
 
                     <button
-                        type="submit"
-                        class="dispatch-btn">
+                    type="submit"
+                    name="save"
+                    class="dispatch-btn">
 
                         <i class="fa-solid fa-floppy-disk"></i>
 
@@ -226,15 +246,12 @@ include("includes/navbar.php");
 
                     </button>
 
-                    <a href="vehicles.php">
+                    <a
+                    href="vehicles.php"
+                    class="cancel-btn"
+                    style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
 
-                        <button
-                            type="button"
-                            class="cancel-btn">
-
-                            Cancel
-
-                        </button>
+                        Cancel
 
                     </a>
 
@@ -242,16 +259,10 @@ include("includes/navbar.php");
 
             </form>
 
-        </section>
-                <?php include 'includes/footer.php'; ?>
+        </div>
 
-    </main>
+    </div>
 
 </div>
 
-<script src="assets/js/dashboard.js"></script>
-
-</body>
-
-</html>
 <?php include("includes/footer.php"); ?>

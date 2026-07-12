@@ -1,247 +1,91 @@
 <?php
+
 include("includes/auth_check.php");
 include("includes/header.php");
-include("includes/sidebar.php");
-include("includes/navbar.php");
+include("config/database.php");
+
+$search = "";
+
+$success = "";
+
+if(isset($_GET['search']))
+{
+    $search = trim($_GET['search']);
+}
+
+$success = "";
+
+if(isset($_GET['added']))
+{
+    $success = "<div class='alert alert-success'>
+    Vehicle Added Successfully.
+    </div>";
+}
+
+if(isset($_GET['deleted']))
+{
+    $success = "<div class='alert alert-warning'>
+    Vehicle Deleted Successfully.
+    </div>";
+}
+
+if(isset($_GET['updated']))
+{
+    $success = "<div class='alert alert-info'>
+    Vehicle Updated Successfully.
+    </div>";
+}
+
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>TransitOps | Vehicles</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
 
 <div class="container">
 
-    <!-- ================= SIDEBAR ================= -->
+    <?php include("includes/sidebar.php"); ?>
 
-    <aside class="sidebar">
+    <div class="main-content">
 
-        <h2>
-
-            <i class="fa-solid fa-truck-fast"></i>
-
-            TransitOps
-
-        </h2>
-
-        <ul>
-
-            <li>
-
-                <a href="dashboard.php">
-
-                    <i class="fa-solid fa-table-columns"></i>
-
-                    <span>Dashboard</span>
-
-                </a>
-
-            </li>
-
-            <li class="active">
-
-                <a href="vehicles.php">
-
-                    <i class="fa-solid fa-truck"></i>
-
-                    <span>Vehicles</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="drivers.php">
-
-                    <i class="fa-solid fa-id-card"></i>
-
-                    <span>Drivers</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="trips.php">
-
-                    <i class="fa-solid fa-route"></i>
-
-                    <span>Trips</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="maintenance.php">
-
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                    <span>Maintenance</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="fuel.php">
-
-                    <i class="fa-solid fa-gas-pump"></i>
-
-                    <span>Fuel & Expenses</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="reports.php">
-
-                    <i class="fa-solid fa-chart-column"></i>
-
-                    <span>Reports</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="settings.php">
-
-                    <i class="fa-solid fa-gear"></i>
-
-                    <span>Settings</span>
-
-                </a>
-
-            </li>
-
-        </ul>
-
-    </aside>
-
-    <!-- ================= MAIN ================= -->
-
-    <main class="main-content">
-
-        <header class="topbar">
-
-            <div class="search-box">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="text"
-                    placeholder="Search Vehicle...">
-
-            </div>
-
-            <div class="top-right">
-
-                <a href="vehicle_add.php">
-
-                    <button class="dispatch-btn">
-
-                        <i class="fa-solid fa-plus"></i>
-
-                        Add Vehicle
-
-                    </button>
-
-                </a>
-
-            </div>
-
-        </header>
-
-        <!-- ================= PAGE TITLE ================= -->
+        <?php include("includes/navbar.php"); ?>
 
         <div class="page-title">
 
-            <h1>Vehicle Registry</h1>
+            <h1>Vehicles</h1>
 
-            <p>
-
-                Manage all fleet vehicles from one place.
-
-            </p>
+            <p>Manage your fleet vehicles.</p>
+            <?php echo $success; ?>
 
         </div>
 
-        <!-- ================= FILTERS ================= -->
+        <div class="top-actions">
 
-        <section class="filters">
+            <form method="GET" class="search-form">
 
-            <select>
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search by Registration or Vehicle Name..."
+                    value="<?php echo htmlspecialchars($search); ?>">
 
-                <option>Vehicle Type</option>
+                <button type="submit" class="dispatch-btn">
 
-                <option>Truck</option>
+                    <i class="fa-solid fa-magnifying-glass"></i>
 
-                <option>Van</option>
+                    Search
 
-                <option>Mini Truck</option>
+                </button>
 
-            </select>
+            </form>
 
-            <select>
+            <a href="vehicle_add.php" class="dispatch-btn">
 
-                <option>Status</option>
+                <i class="fa-solid fa-plus"></i>
 
-                <option>Available</option>
+                Add Vehicle
 
-                <option>On Trip</option>
+            </a>
 
-                <option>Maintenance</option>
+        </div>
 
-            </select>
-
-            <select>
-
-                <option>Fuel Type</option>
-
-                <option>Diesel</option>
-
-                <option>Petrol</option>
-
-                <option>Electric</option>
-
-            </select>
-
-        </section>
-
-        <!-- ================= VEHICLE TABLE ================= -->
-
-        <section class="recent-trips">
-
-            <div class="section-header">
-
-                <h3>Fleet Vehicles</h3>
-
-            </div>
+        <div class="recent-trips">
 
             <table>
 
@@ -251,266 +95,174 @@ include("includes/navbar.php");
 
                         <th>ID</th>
 
-                        <th>Registration</th>
+                        <th>Registration No.</th>
 
-                        <th>Model</th>
+                        <th>Vehicle Name</th>
 
-                        <th>Type</th>
+                        <th>Vehicle Type</th>
 
-                        <th>Driver</th>
+                        <th>Capacity (KG)</th>
+
+                        <th>Odometer</th>
+
+                        <th>Cost</th>
 
                         <th>Status</th>
 
-                        <th>Action</th>
+                        <th>Actions</th>
 
                     </tr>
 
                 </thead>
 
                 <tbody>
-                                        <tr>
+                    <?php
 
-                        <td>VH001</td>
+if($search!="")
+{
+    $stmt = mysqli_prepare(
 
-                        <td>MH12AB1234</td>
+        $conn,
 
-                        <td>Volvo FH16</td>
+        "SELECT *
+        FROM vehicles
+        WHERE registration_number LIKE ?
+        OR vehicle_name LIKE ?
+        ORDER BY vehicle_id DESC"
 
-                        <td>Truck</td>
+    );
 
-                        <td>Alex</td>
+    $keyword = "%".$search."%";
 
-                        <td>
+    mysqli_stmt_bind_param(
+        $stmt,
+        "ss",
+        $keyword,
+        $keyword
+    );
+}
+else
+{
+    $stmt = mysqli_prepare(
 
-                            <span class="badge green">
+        $conn,
 
-                                Available
+        "SELECT *
+        FROM vehicles
+        ORDER BY vehicle_id DESC"
 
-                            </span>
+    );
+}
 
-                        </td>
+mysqli_stmt_execute($stmt);
 
-                        <td>
+$result = mysqli_stmt_get_result($stmt);
 
-                            <a href="vehicle_edit.php?id=1">
+if($result && mysqli_num_rows($result) > 0)
+{
 
-                                <button class="edit-btn">
+    while($row=mysqli_fetch_assoc($result))
+    {
 
-                                    <i class="fa-solid fa-pen"></i>
+?>
+<tr>
 
-                                </button>
+    <td><?php echo $row['vehicle_id']; ?></td>
 
-                            </a>
+    <td><?php echo $row['registration_number']; ?></td>
 
-                            <button class="delete-btn">
+    <td><?php echo $row['vehicle_name']; ?></td>
 
-                                <i class="fa-solid fa-trash"></i>
+    <td><?php echo $row['vehicle_type']; ?></td>
 
-                            </button>
+    <td><?php echo $row['max_load_capacity']; ?> KG</td>
 
-                        </td>
+    <td><?php echo number_format((float)$row['odometer']); ?> KM</td>
 
-                    </tr>
+    <td>₹ <?php echo number_format((float)$row['acquisition_cost'],2); ?></td>
 
-                    <tr>
+    <td>
 
-                        <td>VH002</td>
+<?php
 
-                        <td>DL09CD8821</td>
+$status = $row['status'];
 
-                        <td>Tata Ultra</td>
+if($status=="Available")
+{
+    echo "<span class='badge green'>Available</span>";
+}
+elseif($status=="On Trip")
+{
+    echo "<span class='badge blue'>On Trip</span>";
+}
+elseif($status=="In Shop")
+{
+    echo "<span class='badge orange'>In Shop</span>";
+}
+else
+{
+    echo "<span class='badge red'>Retired</span>";
+}
 
-                        <td>Mini Truck</td>
+?>
 
-                        <td>John</td>
+    </td>
 
-                        <td>
+    <td>
 
-                            <span class="badge blue">
+        <a
+        href="vehicle_edit.php?id=<?php echo $row['vehicle_id']; ?>"
+        class="edit-btn">
 
-                                On Trip
+            <i class="fa-solid fa-pen"></i>
 
-                            </span>
+        </a>
 
-                        </td>
+        <a
+        href="vehicle_delete.php?id=<?php echo $row['vehicle_id']; ?>"
+        class="delete-btn"
+        onclick="return confirm('Are you sure you want to delete this vehicle?');">
 
-                        <td>
+            <i class="fa-solid fa-trash"></i>
 
-                            <a href="vehicle_edit.php?id=2">
+        </a>
 
-                                <button class="edit-btn">
+    </td>
 
-                                    <i class="fa-solid fa-pen"></i>
+</tr>
 
-                                </button>
+<?php
 
-                            </a>
+    }
 
-                            <button class="delete-btn">
+}
+else
+{
 
-                                <i class="fa-solid fa-trash"></i>
+?>
 
-                            </button>
+<tr>
 
-                        </td>
+    <td colspan="9" style="text-align:center;">
 
-                    </tr>
+        No Vehicles Found
 
-                    <tr>
+    </td>
 
-                        <td>VH003</td>
+</tr>
 
-                        <td>UP16EF7788</td>
+<?php
 
-                        <td>Ashok Leyland</td>
+}
 
-                        <td>Truck</td>
-
-                        <td>Rahul</td>
-
-                        <td>
-
-                            <span class="badge orange">
-
-                                Maintenance
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <a href="vehicle_edit.php?id=3">
-
-                                <button class="edit-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                            <button class="delete-btn">
-
-                                <i class="fa-solid fa-trash"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>VH004</td>
-
-                        <td>RJ14XY9021</td>
-
-                        <td>Mahindra Supro</td>
-
-                        <td>Van</td>
-
-                        <td>Priya</td>
-
-                        <td>
-
-                            <span class="badge green">
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <a href="vehicle_edit.php?id=4">
-
-                                <button class="edit-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                            <button class="delete-btn">
-
-                                <i class="fa-solid fa-trash"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>VH005</td>
-
-                        <td>HR55GH1122</td>
-
-                        <td>Eicher Pro</td>
-
-                        <td>Truck</td>
-
-                        <td>Akash</td>
-
-                        <td>
-
-                            <span class="badge red">
-
-                                Retired
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <a href="vehicle_edit.php?id=5">
-
-                                <button class="edit-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                            <button class="delete-btn">
-
-                                <i class="fa-solid fa-trash"></i>
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
+?>                </tbody>
 
             </table>
 
-        </section>
-                <footer class="dashboard-footer">
+        </div>
 
-            <p>
-
-                © 2026 TransitOps ERP |
-                Fleet Management System
-
-            </p>
-
-        </footer>
-
-    </main>
+    </div>
 
 </div>
 
-<script src="assets/js/dashboard.js"></script>
-
-</body>
-
-</html>
 <?php include("includes/footer.php"); ?>

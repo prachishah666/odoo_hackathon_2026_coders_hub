@@ -60,6 +60,8 @@ include("includes/header.php");
 
         </header>
 
+        
+
         <!-- ========= FILTERS ========= -->
 
         <section class="filters">
