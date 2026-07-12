@@ -4,9 +4,6 @@ include("includes/auth_check.php");
 
 include("includes/header.php");
 
-include("includes/sidebar.php");
-
-include("includes/navbar.php");
 
 ?>
 
@@ -15,11 +12,15 @@ include("includes/navbar.php");
 
 <div class="container">
 
+    <?php include("includes/sidebar.php"); ?>
+
 
 
     <!-- ================= MAIN ================= -->
 
     <main class="main-content">
+
+        <?php include("includes/navbar.php"); ?>
 
         <!-- ========= TOP BAR ========= -->
 
