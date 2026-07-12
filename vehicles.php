@@ -1,5 +1,5 @@
 <?php
-// Session check will be added later
+include("includes/auth_check.php");
 ?>
 
 <!DOCTYPE html>
