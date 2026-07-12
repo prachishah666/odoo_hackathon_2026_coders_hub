@@ -1,121 +1,94 @@
 <?php
 
 include("includes/auth_check.php");
-
 include("includes/header.php");
+include("config/database.php");
 
-include("includes/sidebar.php");
+$search="";
 
-include("includes/navbar.php");
+$success="";
+
+if(isset($_GET['search']))
+{
+    $search=trim($_GET['search']);
+}
+
+if(isset($_GET['added']))
+{
+    $success="<div class='alert alert-success'>
+    Fuel Record Added Successfully.
+    </div>";
+}
+
+if(isset($_GET['updated']))
+{
+    $success="<div class='alert alert-info'>
+    Fuel Record Updated Successfully.
+    </div>";
+}
+
+if(isset($_GET['deleted']))
+{
+    $success="<div class='alert alert-warning'>
+    Fuel Record Deleted Successfully.
+    </div>";
+}
 
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>TransitOps | Fuel & Expenses</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
 <div class="container">
 
-    
-    <main class="main-content">
+    <?php include("includes/sidebar.php"); ?>
 
-        <header class="topbar">
+    <div class="main-content">
 
-            <div class="search-box">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="text"
-                    placeholder="Search Fuel Record...">
-
-            </div>
-
-            <div class="top-right">
-
-                <a href="fuel_add.php">
-
-                    <button class="dispatch-btn">
-
-                        <i class="fa-solid fa-plus"></i>
-
-                        Add Fuel Entry
-
-                    </button>
-
-                </a>
-
-            </div>
-
-        </header>
+        <?php include("includes/navbar.php"); ?>
 
         <div class="page-title">
 
-            <h1>Fuel & Expense Management</h1>
+            <h1>Fuel Logs</h1>
 
-            <p>
+            <p>Manage fuel consumption records.</p>
 
-                Track fuel consumption and transportation expenses.
-
-            </p>
+            <?php echo $success; ?>
 
         </div>
 
-        <section class="filters">
+        <div class="top-actions">
 
-            <select>
+            <form method="GET" class="search-form">
 
-                <option>Fuel Type</option>
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search Vehicle..."
+                    value="<?php echo htmlspecialchars($search); ?>">
 
-                <option>Diesel</option>
+                <button
+                    type="submit"
+                    class="dispatch-btn">
 
-                <option>Petrol</option>
+                    <i class="fa-solid fa-magnifying-glass"></i>
 
-                <option>CNG</option>
+                    Search
 
-                <option>Electric</option>
+                </button>
 
-            </select>
+            </form>
 
-            <select>
+            <a
+                href="fuel_add.php"
+                class="dispatch-btn">
 
-                <option>Vehicle</option>
+                <i class="fa-solid fa-plus"></i>
 
-                <option>Truck</option>
+                Add Fuel
 
-                <option>Van</option>
+            </a>
 
-                <option>Mini Truck</option>
+        </div>
 
-            </select>
-
-        </section>
-
-        <section class="recent-trips">
-
-            <div class="section-header">
-
-                <h3>Fuel Records</h3>
-
-            </div>
+        <div class="recent-trips">
 
             <table>
 
@@ -127,186 +100,218 @@ include("includes/navbar.php");
 
                         <th>Vehicle</th>
 
-                        <th>Driver</th>
+                        <th>Registration</th>
 
-                        <th>Fuel Type</th>
+                        <th>Trip ID</th>
 
-                        <th>Quantity</th>
+                        <th>Liters</th>
 
-                        <th>Cost</th>
+                        <th>Price/Liter</th>
+
+                        <th>Total Cost</th>
 
                         <th>Date</th>
 
-                        <th>Action</th>
+                        <th>Actions</th>
 
                     </tr>
 
                 </thead>
 
                 <tbody>
-                                        <tr>
+                    <?php
 
-                        <td>FL001</td>
+if($search!="")
+{
 
-                        <td>Truck A12</td>
+    $stmt = mysqli_prepare(
 
-                        <td>Alex Johnson</td>
+        $conn,
 
-                        <td>Diesel</td>
+        "SELECT
 
-                        <td>120 L</td>
+        f.*,
 
-                        <td>₹12,600</td>
+        v.vehicle_name,
 
-                        <td>15 Jul 2026</td>
+        v.registration_number
 
-                        <td>
+        FROM fuel_logs f
 
-                            <button class="edit-btn">
+        INNER JOIN vehicles v
 
-                                <i class="fa-solid fa-eye"></i>
+        ON f.vehicle_id=v.vehicle_id
 
-                            </button>
+        WHERE
 
-                        </td>
+        v.vehicle_name LIKE ?
 
-                    </tr>
+        OR
 
-                    <tr>
+        v.registration_number LIKE ?
 
-                        <td>FL002</td>
+        ORDER BY f.fuel_id DESC"
 
-                        <td>Van V05</td>
+    );
 
-                        <td>John Smith</td>
+    $keyword="%".$search."%";
 
-                        <td>Petrol</td>
+    mysqli_stmt_bind_param(
 
-                        <td>55 L</td>
+        $stmt,
 
-                        <td>₹5,350</td>
+        "ss",
 
-                        <td>16 Jul 2026</td>
+        $keyword,
 
-                        <td>
+        $keyword
 
-                            <button class="edit-btn">
+    );
 
-                                <i class="fa-solid fa-eye"></i>
+}
+else
+{
 
-                            </button>
+    $stmt = mysqli_prepare(
 
-                        </td>
+        $conn,
 
-                    </tr>
+        "SELECT
 
-                    <tr>
+        f.*,
 
-                        <td>FL003</td>
+        v.vehicle_name,
 
-                        <td>Mini T08</td>
+        v.registration_number
 
-                        <td>Priya Verma</td>
+        FROM fuel_logs f
 
-                        <td>Diesel</td>
+        INNER JOIN vehicles v
 
-                        <td>80 L</td>
+        ON f.vehicle_id=v.vehicle_id
 
-                        <td>₹8,400</td>
+        ORDER BY f.fuel_id DESC"
 
-                        <td>17 Jul 2026</td>
+    );
 
-                        <td>
+}
 
-                            <button class="edit-btn">
+mysqli_stmt_execute($stmt);
 
-                                <i class="fa-solid fa-eye"></i>
+$result=mysqli_stmt_get_result($stmt);
 
-                            </button>
+if(mysqli_num_rows($result)>0)
+{
 
-                        </td>
+while($row=mysqli_fetch_assoc($result))
+{
 
-                    </tr>
+?>
+<tr>
 
-                    <tr>
+    <td><?php echo $row['fuel_id']; ?></td>
 
-                        <td>FL004</td>
+    <td><?php echo htmlspecialchars($row['vehicle_name']); ?></td>
 
-                        <td>Truck X22</td>
+    <td><?php echo htmlspecialchars($row['registration_number']); ?></td>
 
-                        <td>Rahul Sharma</td>
+    <td>
 
-                        <td>Diesel</td>
+        <?php
 
-                        <td>140 L</td>
+        echo $row['trip_id'] ? $row['trip_id'] : "-";
 
-                        <td>₹14,700</td>
+        ?>
 
-                        <td>18 Jul 2026</td>
+    </td>
 
-                        <td>
+    <td>
 
-                            <button class="edit-btn">
+        <?php echo number_format($row['liters'],2); ?>
 
-                                <i class="fa-solid fa-eye"></i>
+        L
 
-                            </button>
+    </td>
 
-                        </td>
+    <td>
 
-                    </tr>
+        ₹ <?php echo number_format($row['price_per_liter'],2); ?>
 
-                    <tr>
+    </td>
 
-                        <td>FL005</td>
+    <td>
 
-                        <td>Truck Z11</td>
+        ₹ <?php echo number_format($row['fuel_cost'],2); ?>
 
-                        <td>Akash Singh</td>
+    </td>
 
-                        <td>CNG</td>
+    <td>
 
-                        <td>62 kg</td>
+        <?php echo $row['fuel_date']; ?>
 
-                        <td>₹4,960</td>
+    </td>
 
-                        <td>19 Jul 2026</td>
+    <td>
 
-                        <td>
+        <a
 
-                            <button class="edit-btn">
+        href="fuel_edit.php?id=<?php echo $row['fuel_id']; ?>"
 
-                                <i class="fa-solid fa-eye"></i>
+        class="edit-btn">
 
-                            </button>
+            <i class="fa-solid fa-pen"></i>
 
-                        </td>
+        </a>
 
-                    </tr>
+        <a
 
+        href="fuel_delete.php?id=<?php echo $row['fuel_id']; ?>"
+
+        class="delete-btn"
+
+        onclick="return confirm('Delete this fuel record?');">
+
+            <i class="fa-solid fa-trash"></i>
+
+        </a>
+
+    </td>
+
+</tr>
+
+<?php
+
+}
+
+}
+else
+{
+
+?>
+
+<tr>
+
+<td colspan="9" style="text-align:center;">
+
+No Fuel Records Found
+
+</td>
+
+</tr>
+
+<?php
+
+}
+
+?>
                 </tbody>
 
             </table>
 
-        </section>
-                <footer class="dashboard-footer">
+        </div>
 
-            <p>
-
-                © 2026 TransitOps ERP |
-                Fleet Management System
-
-            </p>
-
-        </footer>
-
-    </main>
+    </div>
 
 </div>
 
-<script src="assets/js/dashboard.js"></script>
-
-</body>
-
-</html>
 <?php include("includes/footer.php"); ?>

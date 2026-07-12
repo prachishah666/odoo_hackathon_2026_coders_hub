@@ -53,6 +53,13 @@
         </li>
 
         <li>
+            <a href="analytics.php">
+                <i class="fa-solid fa-chart-line"></i>
+                Analytics
+            </a>
+        </li>
+
+        <li>
             <a href="settings.php">
                 <i class="fa-solid fa-gear"></i>
                 Settings
