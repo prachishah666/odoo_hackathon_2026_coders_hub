@@ -1,121 +1,93 @@
 <?php
 
 include("includes/auth_check.php");
-
 include("includes/header.php");
+include("config/database.php");
 
-include("includes/sidebar.php");
+$search="";
 
-include("includes/navbar.php");
+$success="";
+
+if(isset($_GET['search']))
+{
+    $search=trim($_GET['search']);
+}
+
+if(isset($_GET['added']))
+{
+    $success="<div class='alert alert-success'>
+    Maintenance Record Added Successfully.
+    </div>";
+}
+
+if(isset($_GET['updated']))
+{
+    $success="<div class='alert alert-info'>
+    Maintenance Record Updated Successfully.
+    </div>";
+}
+
+if(isset($_GET['deleted']))
+{
+    $success="<div class='alert alert-warning'>
+    Maintenance Record Deleted Successfully.
+    </div>";
+}
 
 ?>
-
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>TransitOps | Maintenance</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
 <div class="container">
 
-    
+    <?php include("includes/sidebar.php"); ?>
 
-    <main class="main-content">
+    <div class="main-content">
 
-        <header class="topbar">
-
-            <div class="search-box">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="text"
-                    placeholder="Search Maintenance...">
-
-            </div>
-
-            <div class="top-right">
-
-                <a href="maintenance_add.php">
-
-                    <button class="dispatch-btn">
-
-                        <i class="fa-solid fa-plus"></i>
-
-                        Schedule Maintenance
-
-                    </button>
-
-                </a>
-
-            </div>
-
-        </header>
+        <?php include("includes/navbar.php"); ?>
 
         <div class="page-title">
 
-            <h1>Maintenance Records</h1>
+            <h1>Maintenance</h1>
 
-            <p>
+            <p>Manage vehicle maintenance records.</p>
 
-                Track servicing and maintenance history of all fleet vehicles.
-
-            </p>
+            <?php echo $success; ?>
 
         </div>
 
-        <section class="filters">
+        <div class="top-actions">
 
-            <select>
+            <form method="GET" class="search-form">
 
-                <option>Status</option>
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search by Vehicle or Maintenance Type..."
+                    value="<?php echo htmlspecialchars($search); ?>">
 
-                <option>Pending</option>
+                <button
+                    type="submit"
+                    class="dispatch-btn">
 
-                <option>In Progress</option>
+                    <i class="fa-solid fa-magnifying-glass"></i>
 
-                <option>Completed</option>
+                    Search
 
-            </select>
+                </button>
 
-            <select>
+            </form>
 
-                <option>Vehicle</option>
+            <a
+                href="maintenance_add.php"
+                class="dispatch-btn">
 
-                <option>Truck</option>
+                <i class="fa-solid fa-plus"></i>
 
-                <option>Van</option>
+                Add Maintenance
 
-                <option>Mini Truck</option>
+            </a>
 
-            </select>
+        </div>
 
-        </section>
-
-        <section class="recent-trips">
-
-            <div class="section-header">
-
-                <h3>Maintenance Log</h3>
-
-            </div>
+        <div class="recent-trips">
 
             <table>
 
@@ -127,15 +99,19 @@ include("includes/navbar.php");
 
                         <th>Vehicle</th>
 
-                        <th>Issue</th>
+                        <th>Registration No.</th>
 
-                        <th>Date</th>
-
-                        <th>Status</th>
+                        <th>Type</th>
 
                         <th>Cost</th>
 
-                        <th>Action</th>
+                        <th>Start Date</th>
+
+                        <th>End Date</th>
+
+                        <th>Status</th>
+
+                        <th>Actions</th>
 
                     </tr>
 
@@ -143,154 +119,204 @@ include("includes/navbar.php");
 
                 <tbody>
                     <?php
-// Session check will be added later
+
+if($search != "")
+{
+
+    $stmt = mysqli_prepare(
+
+        $conn,
+
+        "SELECT
+
+        m.*,
+
+        v.vehicle_name,
+
+        v.registration_number
+
+        FROM maintenance_logs m
+
+        INNER JOIN vehicles v
+
+        ON m.vehicle_id = v.vehicle_id
+
+        WHERE
+
+        v.vehicle_name LIKE ?
+
+        OR
+
+        v.registration_number LIKE ?
+
+        OR
+
+        m.maintenance_type LIKE ?
+
+        ORDER BY m.maintenance_id DESC"
+
+    );
+
+    $keyword = "%".$search."%";
+
+    mysqli_stmt_bind_param(
+
+        $stmt,
+
+        "sss",
+
+        $keyword,
+
+        $keyword,
+
+        $keyword
+
+    );
+
+}
+else
+{
+
+    $stmt = mysqli_prepare(
+
+        $conn,
+
+        "SELECT
+
+        m.*,
+
+        v.vehicle_name,
+
+        v.registration_number
+
+        FROM maintenance_logs m
+
+        INNER JOIN vehicles v
+
+        ON m.vehicle_id = v.vehicle_id
+
+        ORDER BY m.maintenance_id DESC"
+
+    );
+
+}
+
+mysqli_stmt_execute($stmt);
+
+$result = mysqli_stmt_get_result($stmt);
+
+if($result && mysqli_num_rows($result) > 0)
+{
+
+    while($row = mysqli_fetch_assoc($result))
+    {
+
+?>
+<tr>
+
+    <td><?php echo $row['maintenance_id']; ?></td>
+
+    <td><?php echo htmlspecialchars($row['vehicle_name'] ?? ''); ?></td>
+
+    <td><?php echo htmlspecialchars($row['registration_number'] ?? ''); ?></td>
+
+    <td><?php echo htmlspecialchars($row['maintenance_type'] ?? ''); ?></td>
+
+    <td>
+
+        ₹ <?php echo number_format((float)$row['maintenance_cost'],2); ?>
+
+    </td>
+
+    <td><?php echo htmlspecialchars($row['start_date'] ?? ''); ?></td>
+
+    <td>
+
+        <?php
+
+        echo !empty($row['end_date'])
+
+        ? htmlspecialchars($row['end_date'])
+
+        : "Ongoing";
+
+        ?>
+
+    </td>
+
+    <td>
+
+<?php
+
+if($row['status']=="Active")
+{
+    echo "<span class='badge orange'>Active</span>";
+}
+else
+{
+    echo "<span class='badge green'>Completed</span>";
+}
+
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
+    </td>
 
-<head>
+    <td>
 
-    <meta charset="UTF-8">
+        <a
+        href="maintenance_edit.php?id=<?php echo $row['maintenance_id']; ?>"
+        class="edit-btn">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+            <i class="fa-solid fa-pen"></i>
 
-    <title>TransitOps | Maintenance</title>
+        </a>
 
-    <link rel="stylesheet"
-          href="assets/css/style.css">
+        <a
+        href="maintenance_delete.php?id=<?php echo $row['maintenance_id']; ?>"
+        class="delete-btn"
+        onclick="return confirm('Delete this maintenance record?');">
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+            <i class="fa-solid fa-trash"></i>
 
-</head>
+        </a>
 
-<body>
+    </td>
 
-<div class="container">
+</tr>
 
-    
+<?php
 
-    <main class="main-content">
+    }
 
-        <header class="topbar">
+}
+else
+{
 
-            <div class="search-box">
+?>
 
-                <i class="fa-solid fa-magnifying-glass"></i>
+<tr>
 
-                <input
-                    type="text"
-                    placeholder="Search Maintenance...">
+    <td colspan="9" style="text-align:center;">
 
-            </div>
+        No Maintenance Records Found
 
-            <div class="top-right">
+    </td>
 
-                <button class="dispatch-btn">
+</tr>
 
-                    <i class="fa-solid fa-plus"></i>
+<?php
 
-                    Schedule Maintenance
+}
 
-                </button>
+?>
+                </tbody>
 
-            </div>
-
-        </header>
-
-        <div class="page-title">
-
-            <h1>Maintenance Records</h1>
-
-            <p>
-
-                Track servicing and maintenance history of all fleet vehicles.
-
-            </p>
+            </table>
 
         </div>
 
-        <section class="filters">
-
-            <select>
-
-                <option>Status</option>
-
-                <option>Pending</option>
-
-                <option>In Progress</option>
-
-                <option>Completed</option>
-
-            </select>
-
-            <select>
-
-                <option>Vehicle</option>
-
-                <option>Truck</option>
-
-                <option>Van</option>
-
-                <option>Mini Truck</option>
-
-            </select>
-
-        </section>
-
-        <section class="recent-trips">
-
-            <div class="section-header">
-
-                <h3>Maintenance Log</h3>
-
-            </div>
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>ID</th>
-
-                        <th>Vehicle</th>
-
-                        <th>Issue</th>
-
-                        <th>Date</th>
-
-                        <th>Status</th>
-
-                        <th>Cost</th>
-
-                        <th>Action</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-                            <footer class="dashboard-footer">
-
-            <p>
-
-                © 2026 TransitOps ERP |
-                Fleet Management System
-
-            </p>
-
-        </footer>
-
-    </main>
+    </div>
 
 </div>
 
-<script src="assets/js/dashboard.js"></script>
-
-</body>
-
-</html>
 <?php include("includes/footer.php"); ?>

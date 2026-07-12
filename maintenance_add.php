@@ -1,227 +1,203 @@
 <?php
 
 include("includes/auth_check.php");
-
 include("includes/header.php");
+include("config/database.php");
 
-include("includes/sidebar.php");
+$message="";
 
-include("includes/navbar.php");
+if(isset($_POST['save']))
+{
+
+    $vehicle_id = $_POST['vehicle_id'];
+
+    $maintenance_type = trim($_POST['maintenance_type']);
+
+    $description = trim($_POST['description']);
+
+    $maintenance_cost = $_POST['maintenance_cost'];
+
+    $start_date = $_POST['start_date'];
+
+    $end_date = $_POST['end_date'];
+
+    $status = $_POST['status'];
+        mysqli_begin_transaction($conn);
+
+    try
+    {
+
+        // Insert into maintenance_logs
+
+        $insert = mysqli_prepare(
+
+            $conn,
+
+            "INSERT INTO maintenance_logs
+            (
+                vehicle_id,
+                maintenance_type,
+                description,
+                maintenance_cost,
+                start_date,
+                end_date,
+                status
+            )
+
+            VALUES
+            (
+                ?,?,?,?,?,?,?
+            )"
+
+        );
+
+        mysqli_stmt_bind_param(
+
+            $insert,
+
+            "issdsss",
+
+            $vehicle_id,
+
+            $maintenance_type,
+
+            $description,
+
+            $maintenance_cost,
+
+            $start_date,
+
+            $end_date,
+
+            $status
+
+        );
+
+        mysqli_stmt_execute($insert);
+
+        // Change vehicle status to In Shop
+
+        $vehicleStatus = "In Shop";
+
+        $updateVehicle = mysqli_prepare(
+
+            $conn,
+
+            "UPDATE vehicles
+
+            SET status=?
+
+            WHERE vehicle_id=?"
+
+        );
+
+        mysqli_stmt_bind_param(
+
+            $updateVehicle,
+
+            "si",
+
+            $vehicleStatus,
+
+            $vehicle_id
+
+        );
+
+        mysqli_stmt_execute($updateVehicle);
+
+        mysqli_commit($conn);
+
+        header("Location: maintenance.php?added=1");
+
+        exit();
+
+    }
+    catch(Exception $e)
+    {
+
+        mysqli_rollback($conn);
+
+        $message="<div class='alert alert-danger'>
+        Unable to save maintenance record.
+        </div>";
+
+    }
+
+}
 
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Schedule Maintenance | TransitOps</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
 <div class="container">
 
-    <aside class="sidebar">
+    <?php include("includes/sidebar.php"); ?>
 
-        <h2>
+    <div class="main-content">
 
-            <i class="fa-solid fa-truck-fast"></i>
+        <?php include("includes/navbar.php"); ?>
 
-            TransitOps
+        <div class="page-title">
 
-        </h2>
+            <h1>Add Maintenance</h1>
 
-        <ul>
+            <p>Create a new maintenance record.</p>
 
-            <li>
+        </div>
 
-                <a href="dashboard.php">
+        <?php echo $message; ?>
 
-                    <i class="fa-solid fa-table-columns"></i>
+        <div class="recent-trips">
 
-                    <span>Dashboard</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="vehicles.php">
-
-                    <i class="fa-solid fa-truck"></i>
-
-                    <span>Vehicles</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="drivers.php">
-
-                    <i class="fa-solid fa-id-card"></i>
-
-                    <span>Drivers</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="trips.php">
-
-                    <i class="fa-solid fa-route"></i>
-
-                    <span>Trips</span>
-
-                </a>
-
-            </li>
-
-            <li class="active">
-
-                <a href="maintenance.php">
-
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                    <span>Maintenance</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="fuel.php">
-
-                    <i class="fa-solid fa-gas-pump"></i>
-
-                    <span>Fuel & Expenses</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="reports.php">
-
-                    <i class="fa-solid fa-chart-column"></i>
-
-                    <span>Reports</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="settings.php">
-
-                    <i class="fa-solid fa-gear"></i>
-
-                    <span>Settings</span>
-
-                </a>
-
-            </li>
-
-        </ul>
-
-    </aside>
-
-    <main class="main-content">
-
-        <header class="topbar">
-
-            <h2>Schedule Maintenance</h2>
-
-            <a href="maintenance.php">
-
-                <button class="dispatch-btn">
-
-                    Back
-
-                </button>
-
-            </a>
-
-        </header>
-
-        <section class="recent-trips">
-
-            <form action="#" method="POST">
+            <form method="POST">
 
                 <div class="form-grid">
 
                     <div class="form-group">
 
-                        <label>Maintenance ID</label>
+                        <label>Select Vehicle</label>
 
-                        <input
-                            type="text"
-                            value="Auto Generated"
-                            readonly>
+                        <select name="vehicle_id" required>
 
-                    </div>
+                            <option value="">Select Vehicle</option>
 
-                    <div class="form-group">
+                            <?php
 
-                        <label>Vehicle</label>
+                            $vehicles = mysqli_query(
 
-                        <select>
+                                $conn,
 
-                            <option>Truck A12</option>
+                                "SELECT
+                                    vehicle_id,
+                                    registration_number,
+                                    vehicle_name
+                                 FROM vehicles
+                                 WHERE status='Available'
+                                 ORDER BY vehicle_name ASC"
 
-                            <option>Truck X22</option>
+                            );
 
-                            <option>Van V05</option>
+                            while($vehicle = mysqli_fetch_assoc($vehicles))
+                            {
 
-                            <option>Mini T08</option>
+                            ?>
 
-                        </select>
+                            <option value="<?php echo $vehicle['vehicle_id']; ?>">
 
-                    </div>
+                                <?php
 
-                    <div class="form-group">
+                                echo $vehicle['registration_number'];
 
-                        <label>Issue</label>
+                                echo " - ";
 
-                        <input
-                            type="text"
-                            placeholder="Enter Issue">
+                                echo $vehicle['vehicle_name'];
 
-                    </div>
+                                ?>
 
-                    <div class="form-group">
+                            </option>
 
-                        <label>Priority</label>
+                            <?php
 
-                        <select>
+                            }
 
-                            <option>Low</option>
-
-                            <option>Medium</option>
-
-                            <option>High</option>
-
-                            <option>Critical</option>
+                            ?>
 
                         </select>
 
@@ -229,211 +205,27 @@ include("includes/navbar.php");
 
                     <div class="form-group">
 
-                        <label>Assigned Technician</label>
+                        <label>Maintenance Type</label>
 
-                        <input
-                            type="text"
-                            placeholder="Technician Name">
+                        <select
+                        name="maintenance_type"
+                        required>
 
-                    </div>
+                            <option value="">Select</option>
 
-                    <div class="form-group">
+                            <option>Engine Service</option>
 
-                        <label>Estimated Cost (₹)</label>
+                            <option>Oil Change</option>
 
-                        <input
-                            type="number"
-                            placeholder="Estimated Cost">
+                            <option>Brake Service</option>
 
-                    </div>
-                    <?php
-// Session check will be added later
-?>
+                            <option>Tyre Replacement</option>
 
-<!DOCTYPE html>
-<html lang="en">
+                            <option>Battery Replacement</option>
 
-<head>
+                            <option>General Service</option>
 
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Schedule Maintenance | TransitOps</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
-<div class="container">
-
-    <aside class="sidebar">
-
-        <h2>
-
-            <i class="fa-solid fa-truck-fast"></i>
-
-            TransitOps
-
-        </h2>
-
-        <ul>
-
-            <li>
-
-                <a href="dashboard.php">
-
-                    <i class="fa-solid fa-table-columns"></i>
-
-                    <span>Dashboard</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="vehicles.php">
-
-                    <i class="fa-solid fa-truck"></i>
-
-                    <span>Vehicles</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="drivers.php">
-
-                    <i class="fa-solid fa-id-card"></i>
-
-                    <span>Drivers</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="trips.php">
-
-                    <i class="fa-solid fa-route"></i>
-
-                    <span>Trips</span>
-
-                </a>
-
-            </li>
-
-            <li class="active">
-
-                <a href="maintenance.php">
-
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                    <span>Maintenance</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="fuel.php">
-
-                    <i class="fa-solid fa-gas-pump"></i>
-
-                    <span>Fuel & Expenses</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="reports.php">
-
-                    <i class="fa-solid fa-chart-column"></i>
-
-                    <span>Reports</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="settings.php">
-
-                    <i class="fa-solid fa-gear"></i>
-
-                    <span>Settings</span>
-
-                </a>
-
-            </li>
-
-        </ul>
-
-    </aside>
-
-    <main class="main-content">
-
-        <header class="topbar">
-
-            <h2>Schedule Maintenance</h2>
-
-            <a href="maintenance.php">
-
-                <button class="dispatch-btn">
-
-                    Back
-
-                </button>
-
-            </a>
-
-        </header>
-
-        <section class="recent-trips">
-
-            <form action="#" method="POST">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label>Maintenance ID</label>
-
-                        <input
-                            type="text"
-                            value="Auto Generated"
-                            readonly>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Vehicle</label>
-
-                        <select>
-
-                            <option>Truck A12</option>
-
-                            <option>Truck X22</option>
-
-                            <option>Van V05</option>
-
-                            <option>Mini T08</option>
+                            <option>Other</option>
 
                         </select>
 
@@ -441,66 +233,34 @@ include("includes/navbar.php");
 
                     <div class="form-group">
 
-                        <label>Issue</label>
+                        <label>Maintenance Cost (₹)</label>
 
                         <input
-                            type="text"
-                            placeholder="Enter Issue">
+                        type="number"
+                        step="0.01"
+                        name="maintenance_cost"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>Priority</label>
+                        <label>Start Date</label>
 
-                        <select>
-
-                            <option>Low</option>
-
-                            <option>Medium</option>
-
-                            <option>High</option>
-
-                            <option>Critical</option>
-
-                        </select>
+                        <input
+                        type="date"
+                        name="start_date"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>Assigned Technician</label>
+                        <label>End Date</label>
 
                         <input
-                            type="text"
-                            placeholder="Technician Name">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Estimated Cost (₹)</label>
-
-                        <input
-                            type="number"
-                            placeholder="Estimated Cost">
-
-                    </div>
-                                        <div class="form-group">
-
-                        <label>Scheduled Date</label>
-
-                        <input
-                            type="date">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Expected Completion</label>
-
-                        <input
-                            type="date">
+                        type="date"
+                        name="end_date">
 
                     </div>
 
@@ -508,47 +268,26 @@ include("includes/navbar.php");
 
                         <label>Status</label>
 
-                        <select>
+                        <select
+                        name="status"
+                        required>
 
-                            <option>Scheduled</option>
+                            <option value="Active">Active</option>
 
-                            <option>In Progress</option>
-
-                            <option>Waiting for Parts</option>
-
-                            <option>Completed</option>
+                            <option value="Completed">Completed</option>
 
                         </select>
 
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" style="grid-column:1/-1;">
 
-                        <label>Workshop Location</label>
-
-                        <input
-                            type="text"
-                            placeholder="Workshop Name">
-
-                    </div>
-
-                    <div class="form-group full-width">
-
-                        <label>Parts Required</label>
+                        <label>Description</label>
 
                         <textarea
-                            rows="4"
-                            placeholder="Engine Oil, Brake Pads, Coolant..."></textarea>
-
-                    </div>
-
-                    <div class="form-group full-width">
-
-                        <label>Technician Notes</label>
-
-                        <textarea
-                            rows="5"
-                            placeholder="Describe the maintenance work..."></textarea>
+                        name="description"
+                        rows="5"
+                        required></textarea>
 
                     </div>
 
@@ -557,24 +296,22 @@ include("includes/navbar.php");
                 <div class="form-buttons">
 
                     <button
-                        type="submit"
-                        class="dispatch-btn">
+                    type="submit"
+                    name="save"
+                    class="dispatch-btn">
 
-                        <i class="fa-solid fa-floppy-disk"></i>
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
 
-                        Schedule Maintenance
+                        Save Maintenance
 
                     </button>
 
-                    <a href="maintenance.php">
+                    <a
+                    href="maintenance.php"
+                    class="cancel-btn"
+                    style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
 
-                        <button
-                            type="button"
-                            class="cancel-btn">
-
-                            Cancel
-
-                        </button>
+                        Cancel
 
                     </a>
 
@@ -582,5 +319,10 @@ include("includes/navbar.php");
 
             </form>
 
-        </section>
-        <?php include("includes/footer.php"); ?>
+        </div>
+
+    </div>
+
+</div>
+
+<?php include("includes/footer.php"); ?>
