@@ -31,119 +31,7 @@ include("includes/navbar.php");
 
 <div class="container">
 
-    <!-- ================= SIDEBAR ================= -->
 
-    <aside class="sidebar">
-
-        <div class="logo">
-
-            <i class="fa-solid fa-truck-fast"></i>
-
-            <h2>TransitOps</h2>
-
-        </div>
-
-        <ul class="menu">
-
-            <li class="active">
-
-                <a href="dashboard.php">
-
-                    <i class="fa-solid fa-table-columns"></i>
-
-                    <span>Dashboard</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="vehicles.php">
-
-                    <i class="fa-solid fa-truck"></i>
-
-                    <span>Vehicles</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="drivers.php">
-
-                    <i class="fa-solid fa-id-card"></i>
-
-                    <span>Drivers</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="trips.php">
-
-                    <i class="fa-solid fa-route"></i>
-
-                    <span>Trips</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="maintenance.php">
-
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-
-                    <span>Maintenance</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="fuel.php">
-
-                    <i class="fa-solid fa-gas-pump"></i>
-
-                    <span>Fuel & Expenses</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="reports.php">
-
-                    <i class="fa-solid fa-chart-column"></i>
-
-                    <span>Reports</span>
-
-                </a>
-
-            </li>
-
-            <li>
-
-                <a href="settings.php">
-
-                    <i class="fa-solid fa-gear"></i>
-
-                    <span>Settings</span>
-
-                </a>
-
-            </li>
-
-        </ul>
-
-    </aside>
 
     <!-- ================= MAIN ================= -->
 
@@ -567,18 +455,7 @@ include("includes/navbar.php");
             </div>
 
         </section>
-                <!-- ========= FOOTER ========= -->
 
-        <footer class="dashboard-footer">
-
-            <p>
-
-                © 2026 TransitOps ERP |
-                Fleet Management System
-
-            </p>
-
-        </footer>
 
     </main>
 
@@ -589,3 +466,5 @@ include("includes/navbar.php");
 </body>
 
 </html>
+
+<?php include("includes/footer.php"); ?>
