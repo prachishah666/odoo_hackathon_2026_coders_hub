@@ -1,410 +1,216 @@
 <?php
 
 include("includes/auth_check.php");
+include("config/database.php");
+
+$query = mysqli_query(
+    $conn,
+    "SELECT
+
+        t.trip_id,
+        t.source,
+        t.destination,
+        t.planned_distance,
+        t.status,
+
+        v.vehicle_name,
+        v.registration_number,
+
+        u.full_name
+
+    FROM trips t
+
+    INNER JOIN vehicles v
+        ON t.vehicle_id = v.vehicle_id
+
+    INNER JOIN drivers d
+        ON t.driver_id = d.driver_id
+
+    INNER JOIN users u
+        ON d.user_id = u.user_id
+
+    ORDER BY t.trip_id DESC"
+);
 
 include("includes/header.php");
-
 include("includes/sidebar.php");
-
 include("includes/navbar.php");
 
 ?>
 
+<div class="page-title">
 
-<!DOCTYPE html>
-<html lang="en">
+    <h1>Trips</h1>
 
-<head>
+    <p>
 
-    <meta charset="UTF-8">
+        Manage all fleet trips.
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>TransitOps | Trips</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
-<div class="container">
-
-    <!-- ================= SIDEBAR ================= -->
-
-    
-
-    <!-- ================= MAIN CONTENT ================= -->
-
-    <main class="main-content">
-
-        <header class="topbar">
-
-            <div class="search-box">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="text"
-                    placeholder="Search Trips...">
-
-            </div>
-
-            <div class="top-right">
-
-                <a href="trip_add.php">
-
-                    <button class="dispatch-btn">
-
-                        <i class="fa-solid fa-plus"></i>
-
-                        Create Trip
-
-                    </button>
-
-                </a>
-
-            </div>
-
-        </header>
-
-        <!-- ================= PAGE TITLE ================= -->
-
-        <div class="page-title">
-
-            <h1>Trip Management</h1>
-
-            <p>
-
-                Create, dispatch and monitor transportation trips.
-
-            </p>
-
-        </div>
-
-        <!-- ================= FILTERS ================= -->
-
-        <section class="filters">
-
-            <select>
-
-                <option>Status</option>
-
-                <option>Draft</option>
-
-                <option>Dispatched</option>
-
-                <option>Completed</option>
-
-            </select>
-
-            <select>
-
-                <option>Vehicle</option>
-
-                <option>Truck</option>
-
-                <option>Van</option>
-
-                <option>Mini Truck</option>
-
-            </select>
-
-            <select>
-
-                <option>Driver</option>
-
-                <option>Alex</option>
-
-                <option>John</option>
-
-                <option>Priya</option>
-
-            </select>
-
-        </section>
-
-        <!-- ================= TABLE ================= -->
-
-        <section class="recent-trips">
-
-            <div class="section-header">
-
-                <h3>Trips</h3>
-
-            </div>
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>Trip ID</th>
-
-                        <th>Vehicle</th>
-
-                        <th>Driver</th>
-
-                        <th>Source</th>
-
-                        <th>Destination</th>
-
-                        <th>Status</th>
-
-                        <th>ETA</th>
-
-                        <th>Action</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-                                        <tr>
-
-                        <td>TR001</td>
-
-                        <td>Truck A12</td>
-
-                        <td>Alex Johnson</td>
-
-                        <td>Delhi</td>
-
-                        <td>Jaipur</td>
-
-                        <td>
-
-                            <span class="badge blue">
-
-                                Dispatched
-
-                            </span>
-
-                        </td>
-
-                        <td>2 hrs</td>
-
-                        <td>
-
-                            <a href="trip_complete.php?id=1">
-
-                                <button class="edit-btn">
-
-                                    <i class="fa-solid fa-check"></i>
-
-                                </button>
-
-                            </a>
-
-                            <a href="trip_add.php?id=1">
-
-                                <button class="dispatch-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>TR002</td>
-
-                        <td>Van V05</td>
-
-                        <td>John Smith</td>
-
-                        <td>Noida</td>
-
-                        <td>Agra</td>
-
-                        <td>
-
-                            <span class="badge green">
-
-                                Completed
-
-                            </span>
-
-                        </td>
-
-                        <td>-</td>
-
-                        <td>
-
-                            <button class="dispatch-btn" disabled>
-
-                                Completed
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>TR003</td>
-
-                        <td>Mini T08</td>
-
-                        <td>Priya Verma</td>
-
-                        <td>Lucknow</td>
-
-                        <td>Kanpur</td>
-
-                        <td>
-
-                            <span class="badge orange">
-
-                                Draft
-
-                            </span>
-
-                        </td>
-
-                        <td>-</td>
-
-                        <td>
-
-                            <a href="trip_add.php?id=3">
-
-                                <button class="dispatch-btn">
-
-                                    <i class="fa-solid fa-paper-plane"></i>
-
-                                </button>
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>TR004</td>
-
-                        <td>Truck X22</td>
-
-                        <td>Rahul Sharma</td>
-
-                        <td>Mumbai</td>
-
-                        <td>Pune</td>
-
-                        <td>
-
-                            <span class="badge red">
-
-                                Delayed
-
-                            </span>
-
-                        </td>
-
-                        <td>Unknown</td>
-
-                        <td>
-
-                            <a href="trip_add.php?id=4">
-
-                                <button class="dispatch-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>TR005</td>
-
-                        <td>Truck Z11</td>
-
-                        <td>Akash Singh</td>
-
-                        <td>Chandigarh</td>
-
-                        <td>Delhi</td>
-
-                        <td>
-
-                            <span class="badge blue">
-
-                                Dispatched
-
-                            </span>
-
-                        </td>
-
-                        <td>45 mins</td>
-
-                        <td>
-
-                            <a href="trip_complete.php?id=5">
-
-                                <button class="edit-btn">
-
-                                    <i class="fa-solid fa-check"></i>
-
-                                </button>
-
-                            </a>
-
-                            <a href="trip_add.php?id=5">
-
-                                <button class="dispatch-btn">
-
-                                    <i class="fa-solid fa-pen"></i>
-
-                                </button>
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </section>
-                <footer class="dashboard-footer">
-
-            <p>
-
-                © 2026 TransitOps ERP |
-                Fleet Management System
-
-            </p>
-
-        </footer>
-
-    </main>
+    </p>
 
 </div>
 
-<script src="assets/js/dashboard.js"></script>
+<section class="recent-trips">
 
-</body>
+<div class="section-header">
 
-</html>
+    <h3>Trip List</h3>
+
+    <a href="trip_add.php">
+
+        <button class="dispatch-btn">
+
+            <i class="fa-solid fa-plus"></i>
+
+            Create Trip
+
+        </button>
+
+    </a>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Vehicle</th>
+
+<th>Driver</th>
+
+<th>Source</th>
+
+<th>Destination</th>
+
+<th>Distance</th>
+
+<th>Status</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+    <?php
+
+while($row = mysqli_fetch_assoc($query))
+{
+
+?>
+
+<tr>
+
+    <td>
+
+        <?= $row['trip_id']; ?>
+
+    </td>
+
+    <td>
+
+        <?= htmlspecialchars($row['registration_number']); ?>
+
+        <br>
+
+        <small>
+
+            <?= htmlspecialchars($row['vehicle_name']); ?>
+
+        </small>
+
+    </td>
+
+    <td>
+
+        <?= htmlspecialchars($row['full_name']); ?>
+
+    </td>
+
+    <td>
+
+        <?= htmlspecialchars($row['source']); ?>
+
+    </td>
+
+    <td>
+
+        <?= htmlspecialchars($row['destination']); ?>
+
+    </td>
+
+    <td>
+
+        <?= $row['planned_distance']; ?> km
+
+    </td>
+
+    <td>
+
+    <?php
+
+    $status = strtolower($row['status']);
+
+    $class = "badge";
+
+    if($status == "completed")
+    {
+        $class .= " green";
+    }
+    elseif($status == "dispatched")
+    {
+        $class .= " blue";
+    }
+        elseif($status == "draft")
+    {
+        $class .= " orange";
+    }
+        elseif($status == "cancelled")
+    {
+        $class .= " red";
+    }
+
+?>
+
+<span class="<?= $class; ?>">
+
+    <?= htmlspecialchars($row['status']); ?>
+
+</span>
+
+</td>
+
+    <td>
+
+        <a href="trip_complete.php?id=<?= $row['trip_id']; ?>">
+
+            <button class="edit-btn">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+            </button>
+
+        </a>
+
+    </td>
+
+</tr>
+
+<?php
+
+}
+
+?>
+
+</tbody>
+
+</table>
+
+</section>
+
 <?php include("includes/footer.php"); ?>

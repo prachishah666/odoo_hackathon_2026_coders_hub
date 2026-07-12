@@ -1,415 +1,287 @@
 <?php
+
 include("includes/auth_check.php");
+include("config/database.php");
+
+if(isset($_POST['create_trip']))
+{
+
+    $vehicle_id        = intval($_POST['vehicle_id']);
+    $driver_id         = intval($_POST['driver_id']);
+    $source            = trim($_POST['source']);
+    $destination       = trim($_POST['destination']);
+    $cargo_weight      = $_POST['cargo_weight'];
+    $planned_distance  = $_POST['planned_distance'];
+    $start_odometer    = $_POST['start_odometer'];
+    $status            = $_POST['status'];
+
+    $stmt = mysqli_prepare(
+        $conn,
+        "INSERT INTO trips
+        (
+            vehicle_id,
+            driver_id,
+            source,
+            destination,
+            cargo_weight,
+            planned_distance,
+            start_odometer,
+            status
+        )
+        VALUES
+        (
+            ?,?,?,?,?,?,?,?
+        )"
+    );
+
+    mysqli_stmt_bind_param(
+        $stmt,
+        "iissddds",
+        $vehicle_id,
+        $driver_id,
+        $source,
+        $destination,
+        $cargo_weight,
+        $planned_distance,
+        $start_odometer,
+        $status
+    );
+
+    if(mysqli_stmt_execute($stmt))
+    {
+
+        mysqli_query(
+            $conn,
+            "UPDATE vehicles
+             SET status='On Trip'
+             WHERE vehicle_id='$vehicle_id'"
+        );
+
+        mysqli_query(
+            $conn,
+            "UPDATE drivers
+             SET status='On Trip'
+             WHERE driver_id='$driver_id'"
+        );
+
+        header("Location: trips.php");
+        exit();
+
+    }
+
+}
+
+$vehicles = mysqli_query(
+    $conn,
+    "SELECT
+        vehicle_id,
+        registration_number,
+        vehicle_name
+     FROM vehicles
+     WHERE status='Available'
+     ORDER BY vehicle_name"
+);
+
+$drivers = mysqli_query(
+    $conn,
+    "SELECT
+        d.driver_id,
+        u.full_name
+     FROM drivers d
+     INNER JOIN users u
+        ON d.user_id=u.user_id
+     ORDER BY u.full_name"
+);
 
 include("includes/header.php");
-
 include("includes/sidebar.php");
-
 include("includes/navbar.php");
 
 ?>
 
+<div class="page-title">
 
-<!DOCTYPE html>
-<html lang="en">
+    <h1>Create New Trip</h1>
 
-<head>
+    <p>
 
-    <meta charset="UTF-8">
+        Assign a vehicle and driver for a new trip.
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    </p>
 
-    <title>Create Trip | TransitOps</title>
+</div>
 
-    <link rel="stylesheet"
-          href="assets/css/style.css">
+<section class="recent-trips">
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<form method="POST">
 
-</head>
+<div class="form-grid">
+    <div class="form-group">
 
-<body>
+    <label>Vehicle</label>
 
-<div class="container">
+    <select
+        name="vehicle_id"
+        required>
 
-    <aside class="sidebar">
+        <option value="">Select Vehicle</option>
 
-        <h2>
+        <?php while($vehicle = mysqli_fetch_assoc($vehicles)){ ?>
 
-            <i class="fa-solid fa-truck-fast"></i>
+            <option value="<?= $vehicle['vehicle_id']; ?>">
 
-            TransitOps
+                <?= htmlspecialchars($vehicle['registration_number']); ?>
 
-        </h2>
+                -
 
-        <ul>
+                <?= htmlspecialchars($vehicle['vehicle_name']); ?>
 
-            <li>
+            </option>
 
-                <a href="dashboard.php">
+        <?php } ?>
 
-                    <i class="fa-solid fa-table-columns"></i>
+    </select>
 
-                    <span>Dashboard</span>
+</div>
 
-                </a>
+<div class="form-group">
 
-            </li>
+    <label>Driver</label>
 
-            <li>
+    <select
+        name="driver_id"
+        required>
 
-                <a href="vehicles.php">
+        <option value="">Select Driver</option>
 
-                    <i class="fa-solid fa-truck"></i>
+        <?php while($driver = mysqli_fetch_assoc($drivers)){ ?>
 
-                    <span>Vehicles</span>
+            <option value="<?= $driver['driver_id']; ?>">
 
-                </a>
+                <?= htmlspecialchars($driver['full_name']); ?>
 
-            </li>
+            </option>
 
-            <li>
+        <?php } ?>
 
-                <a href="drivers.php">
+    </select>
 
-                    <i class="fa-solid fa-id-card"></i>
+</div>
 
-                    <span>Drivers</span>
+<div class="form-group">
 
-                </a>
+    <label>Source</label>
 
-            </li>
+    <input
+        type="text"
+        name="source"
+        required>
 
-            <li class="active">
+</div>
 
-                <a href="trips.php">
+<div class="form-group">
 
-                    <i class="fa-solid fa-route"></i>
+    <label>Destination</label>
 
-                    <span>Trips</span>
+    <input
+        type="text"
+        name="destination"
+        required>
 
-                </a>
+</div>
 
-            </li>
+<div class="form-group">
 
-            <li>
+    <label>Cargo Weight (kg)</label>
 
-                <a href="maintenance.php">
+    <input
+        type="number"
+        step="0.01"
+        min="0"
+        name="cargo_weight"
+        required>
 
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
+</div>
 
-                    <span>Maintenance</span>
+<div class="form-group">
 
-                </a>
+    <label>Planned Distance (km)</label>
 
-            </li>
+    <input
+        type="number"
+        step="0.01"
+        min="0"
+        name="planned_distance"
+        required>
 
-            <li>
+</div>
 
-                <a href="fuel.php">
+<div class="form-group">
 
-                    <i class="fa-solid fa-gas-pump"></i>
+    <label>Start Odometer</label>
 
-                    <span>Fuel & Expenses</span>
+    <input
+        type="number"
+        step="0.01"
+        min="0"
+        name="start_odometer"
+        required>
 
-                </a>
+</div>
 
-            </li>
+<div class="form-group">
 
-            <li>
+    <label>Status</label>
 
-                <a href="reports.php">
+    <select
+        name="status">
 
-                    <i class="fa-solid fa-chart-column"></i>
+        <option value="Draft">
 
-                    <span>Reports</span>
+            Draft
 
-                </a>
+        </option>
 
-            </li>
+        <option value="Dispatched">
 
-            <li>
+            Dispatched
 
-                <a href="settings.php">
+        </option>
 
-                    <i class="fa-solid fa-gear"></i>
+    </select>
 
-                    <span>Settings</span>
+</div>
 
-                </a>
+</div>
 
-            </li>
+<div class="form-buttons">
 
-        </ul>
+    <button
+        type="submit"
+        name="create_trip"
+        class="dispatch-btn">
 
-    </aside>
+        <i class="fa-solid fa-floppy-disk"></i>
 
-    <main class="main-content">
+        Create Trip
 
-        <header class="topbar">
+    </button>
 
-            <h2>Create New Trip</h2>
+    <a href="trips.php">
 
-            <a href="trips.php">
+        <button
+            type="button"
+            class="cancel-btn">
 
-                <button class="dispatch-btn">
+            Cancel
 
-                    Back
+        </button>
 
-                </button>
+    </a>
 
-            </a>
+</div>
 
-        </header>
+</form>
 
-        <section class="recent-trips">
-
-            <form action="#" method="POST">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label>Trip ID</label>
-
-                        <input
-                            type="text"
-                            value="Auto Generated"
-                            readonly>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Vehicle</label>
-
-                        <select>
-
-                            <option>Truck A12</option>
-
-                            <option>Van V05</option>
-
-                            <option>Mini T08</option>
-
-                        </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Driver</label>
-
-                        <select>
-
-                            <option>Alex Johnson</option>
-
-                            <option>John Smith</option>
-
-                            <option>Priya Verma</option>
-
-                        </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Source</label>
-
-                        <input
-                            type="text"
-                            placeholder="Enter Source">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Destination</label>
-
-                        <input
-                            type="text"
-                            placeholder="Enter Destination">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Cargo Weight (kg)</label>
-
-                        <input
-                            type="number"
-                            placeholder="Weight">
-
-                    </div>
-                                        <div class="form-group">
-
-                        <label>Planned Distance (km)</label>
-
-                        <input
-                            type="number"
-                            placeholder="Distance">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Dispatch Date</label>
-
-                        <input
-                            type="date">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Expected Arrival</label>
-
-                        <input
-                            type="datetime-local">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Trip Status</label>
-
-                        <select>
-
-                            <option>Draft</option>
-
-                            <option>Dispatched</option>
-
-                            <option>Completed</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-                <div class="form-group full-width">
-
-                    <label>Remarks</label>
-
-                    <textarea
-                        rows="5"
-                        placeholder="Additional notes about this trip..."></textarea>
-
-                </div>
-
-                <div class="form-buttons">
-
-                    <button
-                        type="submit"
-                        class="dispatch-btn">
-
-                        <i class="fa-solid fa-floppy-disk"></i>
-
-                        Create Trip
-
-                    </button>
-
-                    <a href="trips.php">
-
-                        <button
-                            type="button"
-                            class="cancel-btn">
-
-                            Cancel
-
-                        </button>
-
-                    </a>
-
-                </div>
-
-            </form>
-
-        </section>
-                            <div class="form-group">
-
-                        <label>Planned Distance (km)</label>
-
-                        <input
-                            type="number"
-                            placeholder="Distance">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Dispatch Date</label>
-
-                        <input
-                            type="date">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Expected Arrival</label>
-
-                        <input
-                            type="datetime-local">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Trip Status</label>
-
-                        <select>
-
-                            <option>Draft</option>
-
-                            <option>Dispatched</option>
-
-                            <option>Completed</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-                <div class="form-group full-width">
-
-                    <label>Remarks</label>
-
-                    <textarea
-                        rows="5"
-                        placeholder="Additional notes about this trip..."></textarea>
-
-                </div>
-
-                <div class="form-buttons">
-
-                    <button
-                        type="submit"
-                        class="dispatch-btn">
-
-                        <i class="fa-solid fa-floppy-disk"></i>
-
-                        Create Trip
-
-                    </button>
-
-                    <a href="trips.php">
-
-                        <button
-                            type="button"
-                            class="cancel-btn">
-
-                            Cancel
-
-                        </button>
-
-                    </a>
-
-                </div>
-
-            </form>
-
-        </section>
-        <?php include("includes/footer.php"); ?>
+</section>
+<?php include("includes/footer.php"); ?>
