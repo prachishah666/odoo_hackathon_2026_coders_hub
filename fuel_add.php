@@ -1,212 +1,314 @@
 <?php
 
 include("includes/auth_check.php");
-
 include("includes/header.php");
+include("config/database.php");
 
-include("includes/sidebar.php");
+$message="";
 
-include("includes/navbar.php");
+if(isset($_POST['save']))
+{
+
+    $vehicle_id = $_POST['vehicle_id'];
+
+    $trip_id = !empty($_POST['trip_id'])
+    ? $_POST['trip_id']
+    : NULL;
+
+    $liters = $_POST['liters'];
+
+    $price_per_liter = $_POST['price_per_liter'];
+
+    $fuel_date = $_POST['fuel_date'];
+
+    // Auto Calculate Fuel Cost
+
+    $fuel_cost = $liters * $price_per_liter;
+        $stmt = mysqli_prepare(
+
+        $conn,
+
+        "INSERT INTO fuel_logs
+        (
+            vehicle_id,
+            trip_id,
+            liters,
+            price_per_liter,
+            fuel_cost,
+            fuel_date
+        )
+
+        VALUES
+        (
+            ?,?,?,?,?,?
+        )"
+
+    );
+
+    mysqli_stmt_bind_param(
+
+        $stmt,
+
+        "iiddds",
+
+        $vehicle_id,
+
+        $trip_id,
+
+        $liters,
+
+        $price_per_liter,
+
+        $fuel_cost,
+
+        $fuel_date
+
+    );
+
+    if(mysqli_stmt_execute($stmt))
+    {
+
+        header("Location: fuel.php?added=1");
+
+        exit();
+
+    }
+    else
+    {
+
+        $message =
+
+        "<div class='alert alert-danger'>
+
+        Unable to save fuel record.
+
+        </div>";
+
+    }
+
+}
 
 ?>
+<div class="container">
 
-<div class="page-title">
+    <?php include("includes/sidebar.php"); ?>
 
-    <h1>Add Fuel & Expense Entry</h1>
+    <div class="main-content">
 
-    <p>
+        <?php include("includes/navbar.php"); ?>
 
-        Record fuel refills and transportation expenses.
+        <div class="page-title">
 
-    </p>
+            <h1>Add Fuel Log</h1>
+
+            <p>Add a new fuel entry.</p>
+
+        </div>
+
+        <?php echo $message; ?>
+
+        <div class="recent-trips">
+
+            <form method="POST">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label>Vehicle</label>
+
+                        <select name="vehicle_id" required>
+
+                            <option value="">Select Vehicle</option>
+
+                            <?php
+
+                            $vehicles = mysqli_query(
+
+                                $conn,
+
+                                "SELECT
+                                    vehicle_id,
+                                    registration_number,
+                                    vehicle_name
+                                 FROM vehicles
+                                 WHERE status <> 'Retired'
+                                 ORDER BY vehicle_name"
+
+                            );
+
+                            while($vehicle=mysqli_fetch_assoc($vehicles))
+                            {
+
+                            ?>
+
+                            <option value="<?php echo $vehicle['vehicle_id']; ?>">
+
+                                <?php
+
+                                echo $vehicle['registration_number'];
+
+                                echo " - ";
+
+                                echo $vehicle['vehicle_name'];
+
+                                ?>
+
+                            </option>
+
+                            <?php } ?>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Trip (Optional)</label>
+
+                        <select name="trip_id">
+
+                            <option value="">No Trip</option>
+
+                            <?php
+
+                            if(mysqli_query($conn,"SHOW TABLES LIKE 'trips'")->num_rows>0)
+                            {
+
+                                $trips=mysqli_query(
+
+                                $conn,
+
+                                "SELECT trip_id FROM trips ORDER BY trip_id DESC"
+
+                                );
+
+                                while($trip=mysqli_fetch_assoc($trips))
+                                {
+
+                            ?>
+
+                            <option value="<?php echo $trip['trip_id']; ?>">
+
+                                Trip #<?php echo $trip['trip_id']; ?>
+
+                            </option>
+
+                            <?php
+
+                                }
+
+                            }
+
+                            ?>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Fuel (Liters)</label>
+
+                        <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        id="liters"
+                        name="liters"
+                        required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Price / Liter (₹)</label>
+
+                        <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        id="price"
+                        name="price_per_liter"
+                        required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Fuel Date</label>
+
+                        <input
+                        type="date"
+                        name="fuel_date"
+                        value="<?php echo date('Y-m-d'); ?>"
+                        required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Total Cost</label>
+
+                        <input
+                        type="text"
+                        id="totalCost"
+                        readonly
+                        value="₹0.00">
+
+                    </div>
+
+                </div>
+
+                <div class="form-buttons">
+
+                    <button
+                    type="submit"
+                    name="save"
+                    class="dispatch-btn">
+
+                        <i class="fa-solid fa-gas-pump"></i>
+
+                        Save Fuel Log
+
+                    </button>
+
+                    <a
+                    href="fuel.php"
+                    class="cancel-btn"
+                    style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
 
 </div>
 
-<section class="recent-trips">
+<script>
 
-    <form action="#" method="POST">
+const liters=document.getElementById("liters");
+const price=document.getElementById("price");
+const total=document.getElementById("totalCost");
 
-        <div class="form-grid">
+function calculateFuelCost()
+{
+    let l=parseFloat(liters.value)||0;
+    let p=parseFloat(price.value)||0;
 
-            <div class="form-group">
+    total.value="₹"+(l*p).toFixed(2);
+}
 
-                <label>Entry ID</label>
+liters.addEventListener("input",calculateFuelCost);
+price.addEventListener("input",calculateFuelCost);
 
-                <input
-                    type="text"
-                    value="Auto Generated"
-                    readonly>
+</script>
 
-            </div>
-
-            <div class="form-group">
-
-                <label>Vehicle</label>
-
-                <select>
-
-                    <option>Truck A12</option>
-
-                    <option>Truck X22</option>
-
-                    <option>Van V05</option>
-
-                    <option>Mini T08</option>
-
-                </select>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Driver</label>
-
-                <select>
-
-                    <option>Alex Johnson</option>
-
-                    <option>John Smith</option>
-
-                    <option>Priya Verma</option>
-
-                    <option>Rahul Sharma</option>
-
-                </select>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Expense Type</label>
-
-                <select>
-
-                    <option>Fuel</option>
-
-                    <option>Toll Tax</option>
-
-                    <option>Parking</option>
-
-                    <option>Repair</option>
-
-                    <option>Insurance</option>
-
-                    <option>Driver Allowance</option>
-
-                    <option>Other</option>
-
-                </select>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Fuel Type</label>
-
-                <select>
-
-                    <option>Diesel</option>
-
-                    <option>Petrol</option>
-
-                    <option>CNG</option>
-
-                    <option>Electric</option>
-
-                    <option>Not Applicable</option>
-
-                </select>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Quantity</label>
-
-                <input
-                    type="number"
-                    placeholder="Litres / Kg">
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Amount (₹)</label>
-
-                <input
-                    type="number"
-                    placeholder="Enter Amount">
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Odometer Reading</label>
-
-                <input
-                    type="number"
-                    placeholder="Current Odometer">
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Fuel Station / Vendor</label>
-
-                <input
-                    type="text"
-                    placeholder="Indian Oil, HP, Parking, etc.">
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Date</label>
-
-                <input
-                    type="date">
-
-            </div>
-
-            <div class="form-group full-width">
-
-                <label>Description</label>
-
-                <textarea
-                    rows="5"
-                    placeholder="Additional details regarding this expense..."></textarea>
-
-            </div>
-
-        </div>
-
-        <div class="form-buttons">
-
-            <button
-                type="submit"
-                class="dispatch-btn">
-
-                <i class="fa-solid fa-floppy-disk"></i>
-
-                Save Entry
-
-            </button>
-
-            <a href="fuel.php">
-
-                <button
-                    type="button"
-                    class="cancel-btn">
-
-                    Cancel
-
-                </button>
-
-            </a>
-
-        </div>
-
-    </form>
-
-</section>
 <?php include("includes/footer.php"); ?>
