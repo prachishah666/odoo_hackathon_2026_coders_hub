@@ -1,64 +1,266 @@
 <?php
 
 include("includes/auth_check.php");
-
 include("includes/header.php");
+include("config/database.php");
 
-include("includes/sidebar.php");
+$message="";
 
-include("includes/navbar.php");
+if(isset($_POST['save']))
+{
+
+    $full_name = trim($_POST['full_name']);
+
+    $email = trim($_POST['email']);
+
+    $phone = trim($_POST['phone']);
+
+    $password = $_POST['password'];
+
+    $license_number = trim($_POST['license_number']);
+
+    $license_category = trim($_POST['license_category']);
+
+    $license_expiry = $_POST['license_expiry'];
+
+    $safety_score = $_POST['safety_score'];
+
+    $driver_status = $_POST['driver_status'];
+
+    $user_status = $_POST['user_status'];
+
+    $role_id = 2;
+    // Check if email already exists
+
+    $checkEmail = mysqli_prepare(
+
+        $conn,
+
+        "SELECT user_id
+         FROM users
+         WHERE email=?"
+
+    );
+
+    mysqli_stmt_bind_param(
+
+        $checkEmail,
+
+        "s",
+
+        $email
+
+    );
+
+    mysqli_stmt_execute($checkEmail);
+
+    mysqli_stmt_store_result($checkEmail);
+
+    if(mysqli_stmt_num_rows($checkEmail)>0)
+    {
+
+        $message="<div class='alert alert-danger'>
+        Email already exists.
+        </div>";
+
+    }
+
+    else
+    {
+
+        // Check if License Number already exists
+
+        $checkLicense = mysqli_prepare(
+
+            $conn,
+
+            "SELECT driver_id
+             FROM drivers
+             WHERE license_number=?"
+
+        );
+
+        mysqli_stmt_bind_param(
+
+            $checkLicense,
+
+            "s",
+
+            $license_number
+
+        );
+
+        mysqli_stmt_execute($checkLicense);
+
+        mysqli_stmt_store_result($checkLicense);
+
+        if(mysqli_stmt_num_rows($checkLicense)>0)
+        {
+
+            $message="<div class='alert alert-danger'>
+            License Number already exists.
+            </div>";
+
+        }
+
+        else
+        {
+
+            // Password Hashing
+
+            $hashedPassword = password_hash(
+
+                $password,
+
+                PASSWORD_DEFAULT
+
+            );
+                        // Insert into users table
+
+            $insertUser = mysqli_prepare(
+
+                $conn,
+
+                "INSERT INTO users
+                (
+                    role_id,
+                    full_name,
+                    email,
+                    password,
+                    phone,
+                    status
+                )
+
+                VALUES
+                (
+                    ?,?,?,?,?,?
+                )"
+
+            );
+
+            mysqli_stmt_bind_param(
+
+                $insertUser,
+
+                "isssss",
+
+                $role_id,
+
+                $full_name,
+
+                $email,
+
+                $hashedPassword,
+
+                $phone,
+
+                $user_status
+
+            );
+
+            if(mysqli_stmt_execute($insertUser))
+            {
+
+                $user_id = mysqli_insert_id($conn);
+
+                // Insert into drivers table
+
+                $insertDriver = mysqli_prepare(
+
+                    $conn,
+
+                    "INSERT INTO drivers
+                    (
+                        user_id,
+                        license_number,
+                        license_category,
+                        license_expiry,
+                        safety_score,
+                        status
+                    )
+
+                    VALUES
+                    (
+                        ?,?,?,?,?,?
+                    )"
+
+                );
+
+                mysqli_stmt_bind_param(
+
+                    $insertDriver,
+
+                    "isssds",
+
+                    $user_id,
+
+                    $license_number,
+
+                    $license_category,
+
+                    $license_expiry,
+
+                    $safety_score,
+
+                    $driver_status
+
+                );
+
+                if(mysqli_stmt_execute($insertDriver))
+                {
+
+                    header("Location: drivers.php?added=1");
+
+                    exit();
+
+                }
+                else
+                {
+
+                    $message="<div class='alert alert-danger'>
+                    Unable to create driver record.
+                    </div>";
+
+                }
+
+            }
+            else
+            {
+
+                $message="<div class='alert alert-danger'>
+                Unable to create user.
+                </div>";
+
+            }
+
+        }
+
+    }
+
+}
 
 ?>
-
-<?php
-// Session check will be added later
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Add Driver | TransitOps</title>
-
-    <link rel="stylesheet"
-          href="assets/css/style.css">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-</head>
-
-<body>
-
 <div class="container">
 
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include("includes/sidebar.php"); ?>
 
-    <main class="main-content">
+    <div class="main-content">
 
-        <?php include 'includes/navbar.php'; ?>
+        <?php include("includes/navbar.php"); ?>
 
         <div class="page-title">
 
             <h1>Add Driver</h1>
 
-            <p>
-
-                Register a new driver into the fleet.
-
-            </p>
+            <p>Register a new driver.</p>
 
         </div>
 
-        <section class="recent-trips">
+        <?php echo $message; ?>
 
-            <form action="#" method="POST">
+        <div class="recent-trips">
+
+            <form method="POST">
 
                 <div class="form-grid">
 
@@ -67,8 +269,9 @@ include("includes/navbar.php");
                         <label>Full Name</label>
 
                         <input
-                            type="text"
-                            placeholder="John Smith">
+                        type="text"
+                        name="full_name"
+                        required>
 
                     </div>
 
@@ -77,18 +280,32 @@ include("includes/navbar.php");
                         <label>Email</label>
 
                         <input
-                            type="email"
-                            placeholder="john@email.com">
+                        type="email"
+                        name="email"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>Phone Number</label>
+                        <label>Phone</label>
 
                         <input
-                            type="text"
-                            placeholder="+91 9876543210">
+                        type="text"
+                        name="phone"
+                        maxlength="15"
+                        required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Password</label>
+
+                        <input
+                        type="password"
+                        name="password"
+                        required>
 
                     </div>
 
@@ -97,89 +314,92 @@ include("includes/navbar.php");
                         <label>License Number</label>
 
                         <input
-                            type="text"
-                            placeholder="HMV12345678">
+                        type="text"
+                        name="license_number"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>License Type</label>
+                        <label>License Category</label>
 
-                        <select>
+                        <select
+                        name="license_category"
+                        required>
+
+                            <option value="">Select</option>
 
                             <option>LMV</option>
 
                             <option>HMV</option>
+
+                            <option>MCWG</option>
 
                             <option>Transport</option>
 
                         </select>
 
                     </div>
-
-                    <div class="form-group">
+                                        <div class="form-group">
 
                         <label>License Expiry</label>
 
                         <input
-                            type="date">
+                        type="date"
+                        name="license_expiry"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>Date of Birth</label>
+                        <label>Safety Score</label>
 
                         <input
-                            type="date">
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        name="safety_score"
+                        value="100"
+                        required>
 
                     </div>
 
                     <div class="form-group">
 
-                        <label>Joining Date</label>
+                        <label>User Status</label>
 
-                        <input
-                            type="date">
+                        <select
+                        name="user_status"
+                        required>
 
-                    </div>
+                            <option value="Active" selected>Active</option>
 
-                    <div class="form-group">
-
-                        <label>Address</label>
-
-                        <input
-                            type="text"
-                            placeholder="Driver Address">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>Status</label>
-
-                        <select>
-
-                            <option>Available</option>
-
-                            <option>On Trip</option>
-
-                            <option>Off Duty</option>
-
-                            <option>Suspended</option>
+                            <option value="Inactive">Inactive</option>
 
                         </select>
 
                     </div>
 
-                    <div class="form-group full-width">
+                    <div class="form-group">
 
-                        <label>Remarks</label>
+                        <label>Driver Status</label>
 
-                        <textarea
-                            rows="5"
-                            placeholder="Additional remarks..."></textarea>
+                        <select
+                        name="driver_status"
+                        required>
+
+                            <option value="Available" selected>Available</option>
+
+                            <option value="On Trip">On Trip</option>
+
+                            <option value="Off Duty">Off Duty</option>
+
+                            <option value="Suspended">Suspended</option>
+
+                        </select>
 
                     </div>
 
@@ -188,24 +408,22 @@ include("includes/navbar.php");
                 <div class="form-buttons">
 
                     <button
-                        type="submit"
-                        class="dispatch-btn">
+                    type="submit"
+                    name="save"
+                    class="dispatch-btn">
 
-                        <i class="fa-solid fa-floppy-disk"></i>
+                        <i class="fa-solid fa-user-plus"></i>
 
                         Save Driver
 
                     </button>
 
-                    <a href="drivers.php">
+                    <a
+                    href="drivers.php"
+                    class="cancel-btn"
+                    style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
 
-                        <button
-                            type="button"
-                            class="cancel-btn">
-
-                            Cancel
-
-                        </button>
+                        Cancel
 
                     </a>
 
@@ -213,17 +431,10 @@ include("includes/navbar.php");
 
             </form>
 
-        </section>
-                <?php include 'includes/footer.php'; ?>
+        </div>
 
-    </main>
+    </div>
 
 </div>
-
-<script src="assets/js/dashboard.js"></script>
-
-</body>
-
-</html>
 
 <?php include("includes/footer.php"); ?>
