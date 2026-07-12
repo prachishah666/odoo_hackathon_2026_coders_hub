@@ -162,13 +162,17 @@ include("includes/navbar.php");
 
             <div class="top-right">
 
-                <button class="dispatch-btn">
+                <a href="fuel_add.php">
 
-                    <i class="fa-solid fa-plus"></i>
+                    <button class="dispatch-btn">
 
-                    Add Fuel Entry
+                        <i class="fa-solid fa-plus"></i>
 
-                </button>
+                        Add Fuel Entry
+
+                    </button>
+
+                </a>
 
             </div>
 

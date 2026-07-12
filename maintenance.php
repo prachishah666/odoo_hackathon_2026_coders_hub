@@ -53,13 +53,17 @@ include("includes/navbar.php");
 
             <div class="top-right">
 
-                <button class="dispatch-btn">
+                <a href="maintenance_add.php">
 
-                    <i class="fa-solid fa-plus"></i>
+                    <button class="dispatch-btn">
 
-                    Schedule Maintenance
+                        <i class="fa-solid fa-plus"></i>
 
-                </button>
+                        Schedule Maintenance
+
+                    </button>
+
+                </a>
 
             </div>
 
